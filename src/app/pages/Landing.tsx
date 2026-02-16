@@ -403,9 +403,8 @@ export function Landing() {
                     <div className="mb-6">
                       <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${plan.gradient} mb-4`}>
                         {planId === 'free' && <Sparkles className="w-6 h-6 text-white" />}
-                        {planId === 'basic' && <Heart className="w-6 h-6 text-white" />}
+                        {planId === 'core' && <Heart className="w-6 h-6 text-white" />}
                         {planId === 'pro' && <Zap className="w-6 h-6 text-white" />}
-                        {planId === 'enterprise' && <Crown className="w-6 h-6 text-white" />}
                       </div>
                       <h3 className="text-xl font-bold mb-2">{plan.displayName}</h3>
                       <div className="flex items-baseline gap-1">

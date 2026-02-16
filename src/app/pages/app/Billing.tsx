@@ -30,7 +30,7 @@ export function Billing() {
   // Mock user subscription data (in real app, fetch from backend)
   const [userSubscription] = useState<UserSubscription>({
     userId: "user123",
-    planId: "basic",
+    planId: "core",
     status: "active",
     creditsRemaining: 145,
     creditsTotal: 200,
@@ -298,9 +298,8 @@ export function Billing() {
                   }`}
                 >
                   <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${plan.gradient} flex items-center justify-center mb-3`}>
-                    {planId === 'basic' && <Package className="w-5 h-5 text-white" />}
+                    {planId === 'core' && <Package className="w-5 h-5 text-white" />}
                     {planId === 'pro' && <Zap className="w-5 h-5 text-white" />}
-                    {planId === 'enterprise' && <Crown className="w-5 h-5 text-white" />}
                   </div>
                   
                   <h4 className="font-bold mb-1">{plan.displayName}</h4>

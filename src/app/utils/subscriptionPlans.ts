@@ -1,6 +1,7 @@
 // Subscription Plan Types and Configuration
+// Updated with new Ezri pricing structure (Final Packages - Locked)
 
-export type PlanTier = 'free' | 'basic' | 'pro' | 'enterprise';
+export type PlanTier = 'free' | 'core' | 'pro';
 
 export interface SubscriptionPlan {
   id: PlanTier;
@@ -8,12 +9,15 @@ export interface SubscriptionPlan {
   displayName: string;
   price: number; // Monthly price in dollars
   credits: number; // Minutes per month
-  payAsYouGoRate: number | null; // Price per minute for PAYG (null if not available)
+  creditsDisplay: string; // Display format: "X Minutes (Y Hours)"
+  payAsYouGoRate: number | null; // Price per 25 minutes for PAYG (null if not available)
+  payAsYouGoDisplay: string | null; // Display format for PAYG
   features: string[];
   popular?: boolean;
   trialDays?: number;
   color: string; // Brand color for UI
   gradient: string; // Gradient class
+  description: string; // Plan description/tagline
 }
 
 export const SUBSCRIPTION_PLANS: Record<PlanTier, SubscriptionPlan> = {
@@ -22,78 +26,91 @@ export const SUBSCRIPTION_PLANS: Record<PlanTier, SubscriptionPlan> = {
     name: 'Free Trial',
     displayName: 'Free Trial',
     price: 0,
-    credits: 30, // 30 minutes trial
+    credits: 30, // 30 minutes (0.5 hour)
+    creditsDisplay: '30 Minutes (0.5 Hour)',
     payAsYouGoRate: null, // No PAYG on free trial
+    payAsYouGoDisplay: null,
     trialDays: 7,
     color: 'gray',
     gradient: 'from-gray-500 to-gray-600',
+    description: 'Taste presence. Trigger desire.',
     features: [
-      '30 minutes with AI Avatar',
+      'FaceTime with Ezri (Basic)',
+      'Session Start / End Protocols',
+      'Minutes Deduction Tracking',
+      'Crisis Detection & De-escalation',
+      'Crisis Resources (Country-Aware)',
+      'Emergency Contact Notification (Opt-in)',
       '7-day trial period',
-      'Basic mood tracking',
-      'Limited journal entries',
-      'Mobile app access'
+      'Limited to 30 minutes total'
     ]
   },
-  basic: {
-    id: 'basic',
-    name: 'Basic',
-    displayName: 'Basic Plan',
+  core: {
+    id: 'core',
+    name: 'Core',
+    displayName: 'Core (Habit Plan)',
     price: 25,
-    credits: 200, // 200 minutes per month
-    payAsYouGoRate: 0.25, // $0.25 per minute
+    credits: 200, // 200 minutes (3.33 hours)
+    creditsDisplay: '200 Minutes (3.33 Hours)',
+    payAsYouGoRate: 5, // $5 per 25 minutes
+    payAsYouGoDisplay: '$5 per 25 Minutes (~0.42 Hour)',
     color: 'blue',
-    gradient: 'from-blue-500 to-blue-600',
+    gradient: 'from-blue-500 to-cyan-600',
+    description: 'For quiet overthinkers and habit builders.',
     features: [
-      '200 minutes/month with AI Avatar',
-      'Pay-as-you-go at $0.25/min',
-      'Unlimited mood tracking',
+      '200 minutes/month (3.33 hours)',
+      'Pay-As-You-Go: $5 per 25 minutes',
+      'Full FaceTime with Ezri',
+      'Interrupted state handling',
+      'Session history & analytics',
+      'Daily mood check-in',
+      'Complete mood history (7-day & 30-day trends)',
       'Unlimited journal entries',
-      'Basic wellness tools',
-      'Email support',
-      'Mobile app access'
+      'Rich journal editor',
+      'Curated wellness tools',
+      'Guided tool use with Ezri',
+      'Profile & avatar customization',
+      'Real-time usage overview',
+      'Self-serve plan management',
+      'Billing history & invoices',
+      'Custom notifications',
+      'Accessibility preferences',
+      'Real-time crisis detection',
+      'De-escalation protocols',
+      'Local resource surfacing',
+      'Opt-in emergency contact alert'
     ]
   },
   pro: {
     id: 'pro',
     name: 'Pro',
-    displayName: 'Pro Plan',
-    price: 59,
-    credits: 500, // 500 minutes per month
-    payAsYouGoRate: 0.15, // $0.15 per minute (better rate)
+    displayName: 'Pro (Clarity Plan)',
+    price: 49,
+    credits: 400, // 400 minutes (6.66 hours)
+    creditsDisplay: '400 Minutes (6.66 Hours)',
+    payAsYouGoRate: 5, // $5 per 25 minutes (same rate)
+    payAsYouGoDisplay: '$5 per 25 Minutes (~0.42 Hour)',
     popular: true,
     color: 'purple',
     gradient: 'from-purple-500 to-pink-500',
+    description: 'For high-functioning holders and decision-makers.',
     features: [
-      '500 minutes/month with AI Avatar',
-      'Pay-as-you-go at $0.15/min (40% savings)',
-      'Priority AI response',
-      'Advanced wellness insights',
-      'Personalized recommendations',
-      'Weekly progress reports',
-      'Priority support',
-      'Mobile app access'
-    ]
-  },
-  enterprise: {
-    id: 'enterprise',
-    name: 'Enterprise',
-    displayName: 'Enterprise Plan',
-    price: 149,
-    credits: 1500, // 1500 minutes per month
-    payAsYouGoRate: 0.10, // $0.10 per minute (best rate)
-    color: 'amber',
-    gradient: 'from-amber-500 to-orange-500',
-    features: [
-      '1,500 minutes/month with AI Avatar',
-      'Pay-as-you-go at $0.10/min (60% savings)',
-      'Premium AI avatars',
-      'Dedicated account manager',
-      'Custom wellness programs',
-      'Team/family plan options',
-      'Advanced analytics dashboard',
-      '24/7 priority support',
-      'API access'
+      '400 minutes/month (6.66 hours)',
+      'Pay-As-You-Go: $5 per 25 minutes',
+      'Everything in Core, plus:',
+      'Longer uninterrupted sessions',
+      'Priority system handling',
+      'Priority resource allocation',
+      'Extended mood trends (7/30/90 days)',
+      'Export-ready journaling structure',
+      'Stronger session continuity',
+      'Full wellness tool library access',
+      'Deeper guided sessions',
+      'Detailed session history logs',
+      'Usage transparency dashboard',
+      'Enhanced privacy controls',
+      'Same universal crisis system',
+      'Standard de-escalation protocols'
     ]
   }
 };
@@ -131,11 +148,13 @@ export interface PayAsYouGoPurchase {
   userId: string;
   planId: PlanTier;
   minutesPurchased: number;
-  ratePerMinute: number;
+  packageSize: number; // 25 minutes
+  pricePerPackage: number; // $5
   totalCost: number;
   purchaseDate: string; // ISO date
   paymentMethod: string;
   status: 'completed' | 'pending' | 'failed';
+  expiresAt: string; // PAYG minutes expire monthly - no rollover
 }
 
 // Helper Functions
@@ -144,13 +163,20 @@ export function getAvailablePAYGRate(planId: PlanTier): number | null {
 }
 
 export function canUsePAYG(planId: PlanTier): boolean {
+  // PAYG only available for Core & Pro (not Free Trial)
   return planId !== 'free' && SUBSCRIPTION_PLANS[planId].payAsYouGoRate !== null;
 }
 
-export function calculatePAYGCost(planId: PlanTier, minutes: number): number {
-  const rate = getAvailablePAYGRate(planId);
-  if (!rate) return 0;
-  return rate * minutes;
+export function calculatePAYGCost(minutes: number): number {
+  // PAYG is $5 per 25 minutes for both Core and Pro
+  const packages = Math.ceil(minutes / 25);
+  return packages * 5;
+}
+
+export function calculatePAYGMinutes(cost: number): number {
+  // How many minutes can be purchased with given cost
+  const packages = Math.floor(cost / 5);
+  return packages * 25;
 }
 
 export function getRemainingTrialDays(startDate: string): number {
@@ -162,6 +188,11 @@ export function getRemainingTrialDays(startDate: string): number {
 }
 
 export function formatMinutes(minutes: number): string {
+  const hours = (minutes / 60).toFixed(2);
+  return `${minutes} Minutes (${hours} Hours)`;
+}
+
+export function formatMinutesShort(minutes: number): string {
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
   if (hours > 0) {
@@ -183,3 +214,22 @@ export function shouldWarnLowCredits(creditsRemaining: number): boolean {
 export function hasCreditsRemaining(subscription: UserSubscription): boolean {
   return subscription.creditsRemaining > 0 || subscription.payAsYouGoCredits > 0;
 }
+
+// Global Rules (apply to all plans)
+export const GLOBAL_RULES = {
+  crisisDetection: 'INCLUDED', // Crisis detection & de-escalation included in all plans
+  crisisResources: 'INCLUDED', // Crisis resources surfaced (country-aware)
+  emergencyContact: 'OPT_IN_ONLY', // Emergency contact notification opt-in only
+  noTherapyClaims: 'PROHIBITED', // No therapy claims allowed
+  noUnlimitedUsage: 'PROHIBITED', // No unlimited usage allowed
+  safetyNotPremium: 'Safety is not a premium feature' // Safety universal across all tiers
+};
+
+// Display conventions
+export const DISPLAY_STANDARDS = {
+  timeFormat: 'Minutes (Hours)', // ISO-aligned display: "200 Minutes (3.33 Hours)"
+  payAsYouGoPackage: '25 Minutes (~0.42 Hour)',
+  payAsYouGoPrice: '$5',
+  billingCycle: 'Monthly (resets monthly)',
+  rollover: 'None (PAYG minutes expire monthly)'
+};
