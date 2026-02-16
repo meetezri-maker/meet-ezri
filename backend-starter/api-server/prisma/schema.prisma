@@ -1,0 +1,522 @@
+// Ezri Database Schema - Prisma ORM
+// This schema is compatible with Supabase PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =====================================================
+// USERS & AUTHENTICATION
+// =====================================================
+
+model User {
+  id       String   @id @db.Uuid
+  email    String   @unique @db.VarChar(255)
+  fullName String?  @map("full_name") @db.VarChar(255)
+  avatarUrl String? @map("avatar_url") @db.Text
+  role     String   @default("user") @db.VarChar(50)
+
+  // Onboarding
+  onboardingCompleted Boolean @default(false) @map("onboarding_completed")
+  onboardingStep      Int     @default(1) @map("onboarding_step")
+  selectedAvatar      String? @map("selected_avatar") @db.VarChar(50)
+
+  // Preferences
+  timezone String @default("UTC") @db.VarChar(50)
+  language String @default("en") @db.VarChar(10)
+  theme    String @default("light") @db.VarChar(20)
+
+  // Status
+  status       String    @default("active") @db.VarChar(50)
+  lastActiveAt DateTime? @map("last_active_at") @db.Timestamptz(6)
+
+  // Metadata
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  // Relations
+  preferences       UserPreferences?
+  moodEntries       MoodEntry[]
+  journalEntries    JournalEntry[]
+  conversations     Conversation[]
+  crisisAlerts      CrisisAlert[]     @relation("UserCrisisAlerts")
+  trustedContacts   TrustedContact[]
+  goals             Goal[]
+  subscription      Subscription?
+  invoices          Invoice[]
+  notifications     Notification[]
+  wellnessProgress  WellnessProgress[]
+  reviewedCrisisAlerts CrisisAlert[] @relation("ReviewedBy")
+  assignedCrisisAlerts CrisisAlert[] @relation("AssignedTo")
+  auditLogs         AuditLog[]
+
+  @@map("users")
+}
+
+model UserPreferences {
+  id     String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId String @unique @map("user_id") @db.Uuid
+
+  // Notifications
+  emailNotifications Boolean @default(true) @map("email_notifications")
+  pushNotifications  Boolean @default(true) @map("push_notifications")
+  smsNotifications   Boolean @default(false) @map("sms_notifications")
+
+  // Privacy
+  dataSharing       Boolean @default(false) @map("data_sharing")
+  analyticsTracking Boolean @default(true) @map("analytics_tracking")
+
+  // Wellness
+  dailyReminderTime   DateTime? @map("daily_reminder_time") @db.Time(6)
+  moodCheckFrequency  String    @default("daily") @map("mood_check_frequency") @db.VarChar(50)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+// =====================================================
+// MOOD TRACKING
+// =====================================================
+
+model MoodEntry {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  mood      String   @db.VarChar(50)
+  moodScore Int?     @map("mood_score")
+  notes     String?  @db.Text
+  triggers  String[] @db.Text
+  activities String[] @db.Text
+
+  // Context
+  weather  String? @db.VarChar(50)
+  location String? @db.VarChar(255)
+
+  // Timestamp
+  loggedAt  DateTime @map("logged_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, loggedAt(sort: Desc)])
+  @@map("mood_entries")
+}
+
+// =====================================================
+// JOURNAL ENTRIES
+// =====================================================
+
+model JournalEntry {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  title     String?  @db.VarChar(500)
+  content   String   @db.Text
+  mood      String?  @db.VarChar(50)
+  tags      String[] @db.Text
+  promptId  String?  @map("prompt_id") @db.Uuid
+
+  // Privacy
+  isPrivate Boolean @default(true) @map("is_private")
+
+  // AI Analysis
+  sentimentScore Float?    @map("sentiment_score") @db.Decimal(3, 2)
+  analyzedAt     DateTime? @map("analyzed_at") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  user   User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prompt JournalPrompt? @relation(fields: [promptId], references: [id])
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("journal_entries")
+}
+
+model JournalPrompt {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  prompt     String   @db.Text
+  category   String?  @db.VarChar(100)
+  tags       String[] @db.Text
+  isActive   Boolean  @default(true) @map("is_active")
+  usageCount Int      @default(0) @map("usage_count")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  journalEntries JournalEntry[]
+
+  @@map("journal_prompts")
+}
+
+// =====================================================
+// AI CONVERSATIONS
+// =====================================================
+
+model Conversation {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  sessionId String   @unique @map("session_id") @db.VarChar(255)
+  avatarId  String   @map("avatar_id") @db.VarChar(50)
+
+  // Status
+  status String @default("active") @db.VarChar(50)
+
+  // Safety
+  safetyState     String    @default("NORMAL") @map("safety_state") @db.VarChar(50)
+  crisisDetected  Boolean   @default(false) @map("crisis_detected")
+  crisisTimestamp DateTime? @map("crisis_timestamp") @db.Timestamptz(6)
+
+  // Duration
+  startedAt       DateTime @default(now()) @map("started_at") @db.Timestamptz(6)
+  endedAt         DateTime? @map("ended_at") @db.Timestamptz(6)
+  durationSeconds Int?     @map("duration_seconds")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  user          User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages      ConversationMessage[]
+  crisisAlerts  CrisisAlert[]
+
+  @@index([userId, startedAt(sort: Desc)])
+  @@index([sessionId])
+  @@map("conversations")
+}
+
+model ConversationMessage {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  conversationId String   @map("conversation_id") @db.Uuid
+  role           String   @db.VarChar(50)
+  content        String   @db.Text
+
+  // Voice
+  audioUrl   String? @map("audio_url") @db.Text
+  transcript String? @db.Text
+
+  // AI metadata
+  model      String? @db.VarChar(100)
+  tokensUsed Int?    @map("tokens_used")
+
+  // Safety
+  flagged    Boolean @default(false)
+  flagReason String? @map("flag_reason") @db.Text
+
+  timestamp DateTime @default(now()) @db.Timestamptz(6)
+
+  // Relations
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, timestamp(sort: Asc)])
+  @@map("conversation_messages")
+}
+
+// =====================================================
+// CRISIS MANAGEMENT
+// =====================================================
+
+model CrisisAlert {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  conversationId String?  @map("conversation_id") @db.Uuid
+
+  // Alert details
+  severity        String   @db.VarChar(50)
+  triggerType     String   @map("trigger_type") @db.VarChar(100)
+  detectedSignals String[] @map("detected_signals") @db.Text
+  context         String?  @db.Text
+
+  // Status
+  status String @default("pending") @db.VarChar(50)
+
+  // Admin handling
+  assignedTo      String? @map("assigned_to") @db.Uuid
+  reviewedBy      String? @map("reviewed_by") @db.Uuid
+  reviewedAt      DateTime? @map("reviewed_at") @db.Timestamptz(6)
+  resolutionNotes String? @map("resolution_notes") @db.Text
+
+  // Actions taken
+  resourcesShown     Boolean @default(false) @map("resources_shown")
+  contactsNotified   Boolean @default(false) @map("contacts_notified")
+  emergencyContacted Boolean @default(false) @map("emergency_contacted")
+
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  resolvedAt DateTime? @map("resolved_at") @db.Timestamptz(6)
+
+  // Relations
+  user         User          @relation("UserCrisisAlerts", fields: [userId], references: [id], onDelete: Cascade)
+  conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  assignedToUser User?       @relation("AssignedTo", fields: [assignedTo], references: [id])
+  reviewedByUser User?       @relation("ReviewedBy", fields: [reviewedBy], references: [id])
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([status, severity])
+  @@map("crisis_alerts")
+}
+
+model TrustedContact {
+  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String  @map("user_id") @db.Uuid
+  name           String  @db.VarChar(255)
+  relationship   String? @db.VarChar(100)
+  phone          String? @db.VarChar(50)
+  email          String? @db.VarChar(255)
+  notifyOnCrisis Boolean @default(true) @map("notify_on_crisis")
+  isActive       Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("trusted_contacts")
+}
+
+// =====================================================
+// WELLNESS CONTENT
+// =====================================================
+
+model WellnessContent {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type         String   @db.VarChar(50)
+  title        String   @db.VarChar(500)
+  description  String?  @db.Text
+  content      String?  @db.Text
+  audioUrl     String?  @map("audio_url") @db.Text
+  videoUrl     String?  @map("video_url") @db.Text
+  thumbnailUrl String?  @map("thumbnail_url") @db.Text
+  durationMinutes Int?  @map("duration_minutes")
+  difficulty   String?  @db.VarChar(50)
+  tags         String[] @db.Text
+  category     String?  @db.VarChar(100)
+  isPublished  Boolean  @default(false) @map("is_published")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  progress WellnessProgress[]
+
+  @@index([type, isPublished])
+  @@map("wellness_content")
+}
+
+model WellnessProgress {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String   @map("user_id") @db.Uuid
+  contentId         String   @map("content_id") @db.Uuid
+  status            String   @default("in_progress") @db.VarChar(50)
+  progressPercentage Int     @default(0) @map("progress_percentage")
+  startedAt         DateTime @default(now()) @map("started_at") @db.Timestamptz(6)
+  completedAt       DateTime? @map("completed_at") @db.Timestamptz(6)
+
+  // Relations
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content WellnessContent @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, contentId])
+  @@map("wellness_progress")
+}
+
+// =====================================================
+// GOALS & HABITS
+// =====================================================
+
+model Goal {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  title       String   @db.VarChar(500)
+  description String?  @db.Text
+  category    String?  @db.VarChar(100)
+  targetDate  DateTime? @map("target_date") @db.Date
+  status      String   @default("active") @db.VarChar(50)
+  progressPercentage Int @default(0) @map("progress_percentage")
+  frequency   String?  @db.VarChar(50)
+
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  completedAt DateTime? @map("completed_at") @db.Timestamptz(6)
+
+  // Relations
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  checkins GoalCheckin[]
+
+  @@index([userId, status])
+  @@map("goals")
+}
+
+model GoalCheckin {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  goalId    String   @map("goal_id") @db.Uuid
+  completed Boolean  @default(true)
+  notes     String?  @db.Text
+  mood      String?  @db.VarChar(50)
+  checkedInAt DateTime @default(now()) @map("checked_in_at") @db.Timestamptz(6)
+
+  // Relations
+  goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@map("goal_checkins")
+}
+
+// =====================================================
+// BILLING & SUBSCRIPTIONS
+// =====================================================
+
+model Subscription {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId               String    @unique @map("user_id") @db.Uuid
+  stripeCustomerId     String?   @unique @map("stripe_customer_id") @db.VarChar(255)
+  stripeSubscriptionId String?   @unique @map("stripe_subscription_id") @db.VarChar(255)
+  plan                 String    @db.VarChar(50)
+  status               String    @default("active") @db.VarChar(50)
+  amount               Decimal?  @db.Decimal(10, 2)
+  currency             String    @default("usd") @db.VarChar(10)
+  interval             String?   @db.VarChar(50)
+
+  currentPeriodStart DateTime? @map("current_period_start") @db.Timestamptz(6)
+  currentPeriodEnd   DateTime? @map("current_period_end") @db.Timestamptz(6)
+  cancelAt           DateTime? @map("cancel_at") @db.Timestamptz(6)
+  canceledAt         DateTime? @map("canceled_at") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invoices Invoice[]
+
+  @@index([userId])
+  @@index([stripeSubscriptionId])
+  @@map("subscriptions")
+}
+
+model Invoice {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  subscriptionId  String   @map("subscription_id") @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  stripeInvoiceId String?  @unique @map("stripe_invoice_id") @db.VarChar(255)
+  amount          Decimal  @db.Decimal(10, 2)
+  currency        String   @default("usd") @db.VarChar(10)
+  status          String?  @db.VarChar(50)
+  invoicePdfUrl   String?  @map("invoice_pdf_url") @db.Text
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  paidAt    DateTime? @map("paid_at") @db.Timestamptz(6)
+
+  // Relations
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("invoices")
+}
+
+// =====================================================
+// ADMIN & ANALYTICS
+// =====================================================
+
+model AuditLog {
+  id           String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  actorId      String? @map("actor_id") @db.Uuid
+  actorEmail   String? @map("actor_email") @db.VarChar(255)
+  actorRole    String? @map("actor_role") @db.VarChar(50)
+  action       String  @db.VarChar(255)
+  resourceType String? @map("resource_type") @db.VarChar(100)
+  resourceId   String? @map("resource_id") @db.Uuid
+  changes      Json?
+  metadata     Json?
+  ipAddress    String? @map("ip_address")
+  userAgent    String? @map("user_agent") @db.Text
+
+  timestamp DateTime @default(now()) @db.Timestamptz(6)
+
+  // Relations
+  actor User? @relation(fields: [actorId], references: [id])
+
+  @@index([actorId, timestamp(sort: Desc)])
+  @@index([action, timestamp(sort: Desc)])
+  @@map("audit_logs")
+}
+
+model SystemLog {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  level      String   @db.VarChar(50)
+  service    String   @db.VarChar(100)
+  message    String   @db.Text
+  errorStack String?  @map("error_stack") @db.Text
+  metadata   Json?
+  timestamp  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([level, timestamp(sort: Desc)])
+  @@map("system_logs")
+}
+
+model AnalyticsDaily {
+  id   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  date DateTime @unique @db.Date
+
+  // User metrics
+  totalUsers  Int @default(0) @map("total_users")
+  activeUsers Int @default(0) @map("active_users")
+  newUsers    Int @default(0) @map("new_users")
+
+  // Engagement
+  totalSessions            Int     @default(0) @map("total_sessions")
+  totalConversations       Int     @default(0) @map("total_conversations")
+  avgSessionDurationMinutes Decimal? @map("avg_session_duration_minutes") @db.Decimal(10, 2)
+
+  // Mood
+  totalMoodEntries Int     @default(0) @map("total_mood_entries")
+  avgMoodScore     Decimal? @map("avg_mood_score") @db.Decimal(3, 2)
+
+  // Crisis
+  totalCrisisAlerts Int @default(0) @map("total_crisis_alerts")
+
+  // Revenue
+  mrr                   Decimal @default(0) @map("mrr") @db.Decimal(10, 2)
+  newSubscriptions      Int     @default(0) @map("new_subscriptions")
+  canceledSubscriptions Int     @default(0) @map("canceled_subscriptions")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("analytics_daily")
+}
+
+// =====================================================
+// NOTIFICATIONS
+// =====================================================
+
+model Notification {
+  id       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId   String   @map("user_id") @db.Uuid
+  type     String   @db.VarChar(100)
+  title    String   @db.VarChar(500)
+  message  String   @db.Text
+  sentVia  String[] @map("sent_via") @db.Text
+  isRead   Boolean  @default(false) @map("is_read")
+  readAt   DateTime? @map("read_at") @db.Timestamptz(6)
+  metadata Json?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt(sort: Desc)])
+  @@map("notifications")
+}
