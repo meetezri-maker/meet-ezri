@@ -68,14 +68,16 @@ export function Billing() {
   const daysUntilRenewal = Math.ceil((new Date(userSubscription.billingCycle.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
 
   const [showPAYGModal, setShowPAYGModal] = useState(false);
-  const [paygMinutes, setPaygMinutes] = useState(60);
+  const [paygMinutes, setPaygMinutes] = useState(25); // Default to 25 minutes (1 package)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
-  const paygCost = currentPlan.payAsYouGoRate ? (currentPlan.payAsYouGoRate * paygMinutes) : 0;
+  // Calculate PAYG cost: $5 per 25 minutes
+  const paygPackages = Math.ceil(paygMinutes / 25);
+  const paygCost = paygPackages * 5;
 
   const handleBuyPAYG = () => {
     // In real app: process payment and add credits
-    alert(`Purchase ${paygMinutes} minutes for $${paygCost.toFixed(2)}`);
+    alert(`Purchase ${paygPackages} package(s) (${paygPackages * 25} minutes) for $${paygCost.toFixed(2)}`);
     setShowPAYGModal(false);
   };
 
@@ -189,27 +191,23 @@ export function Billing() {
                   <h3 className="text-xl font-bold text-green-900">Pay-As-You-Go Available</h3>
                 </div>
                 <p className="text-green-700 mb-4">
-                  Need more minutes this month? Purchase additional time at your discounted rate of 
-                  <span className="font-bold"> ${currentPlan.payAsYouGoRate}/minute</span>.
+                  Need more minutes this month? Purchase additional time at \n                  <span className="font-bold"> $5 per 25 Minutes (~0.42 Hour)</span>. Minutes expire monthly.
                 </p>
                 <div className="grid sm:grid-cols-3 gap-3">
                   <div className="p-3 bg-white/60 rounded-lg border border-green-200">
-                    <p className="text-sm text-green-700">30 minutes</p>
-                    <p className="text-lg font-bold text-green-800">
-                      ${(currentPlan.payAsYouGoRate * 30).toFixed(2)}
-                    </p>
+                    <p className="text-sm text-green-700">25 Minutes</p>
+                    <p className="text-lg font-bold text-green-800">$5</p>
+                    <p className="text-xs text-green-600">(~0.42 Hour)</p>
                   </div>
                   <div className="p-3 bg-white/60 rounded-lg border border-green-200">
-                    <p className="text-sm text-green-700">60 minutes</p>
-                    <p className="text-lg font-bold text-green-800">
-                      ${(currentPlan.payAsYouGoRate * 60).toFixed(2)}
-                    </p>
+                    <p className="text-sm text-green-700">50 Minutes</p>
+                    <p className="text-lg font-bold text-green-800">$10</p>
+                    <p className="text-xs text-green-600">(~0.83 Hours)</p>
                   </div>
                   <div className="p-3 bg-white/60 rounded-lg border border-green-200">
-                    <p className="text-sm text-green-700">120 minutes</p>
-                    <p className="text-lg font-bold text-green-800">
-                      ${(currentPlan.payAsYouGoRate * 120).toFixed(2)}
-                    </p>
+                    <p className="text-sm text-green-700">100 Minutes</p>
+                    <p className="text-lg font-bold text-green-800">$20</p>
+                    <p className="text-xs text-green-600">(~1.67 Hours)</p>
                   </div>
                 </div>
               </div>
@@ -281,54 +279,88 @@ export function Billing() {
 
         {/* All Available Plans */}
         <Card className="p-6">
-          <h3 className="text-xl font-bold mb-6">Compare All Plans</h3>
+          <h3 className="text-xl font-bold mb-6">All Available Plans</h3>
           
-          <div className="grid md:grid-cols-4 gap-6">
-            {(Object.keys(SUBSCRIPTION_PLANS) as PlanTier[]).filter(id => id !== 'free').map((planId) => {
+          <div className="grid md:grid-cols-3 gap-6">
+            {(Object.keys(SUBSCRIPTION_PLANS) as PlanTier[]).map((planId) => {
               const plan = SUBSCRIPTION_PLANS[planId];
               const isCurrent = planId === userSubscription.planId;
+              const isFreeTrial = planId === 'free';
               
               return (
                 <div
                   key={planId}
-                  className={`p-4 rounded-xl border-2 transition-all ${
+                  className={`p-6 rounded-xl border-2 transition-all ${
                     isCurrent 
                       ? 'border-purple-500 bg-purple-50' 
+                      : isFreeTrial
+                      ? 'border-gray-300 bg-gray-50/50 opacity-75'
                       : 'border-border bg-muted/30 hover:border-purple-300'
                   }`}
                 >
-                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${plan.gradient} flex items-center justify-center mb-3`}>
-                    {planId === 'core' && <Package className="w-5 h-5 text-white" />}
-                    {planId === 'pro' && <Zap className="w-5 h-5 text-white" />}
+                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${plan.gradient} flex items-center justify-center mb-4`}>
+                    {planId === 'free' && <Sparkles className="w-6 h-6 text-white" />}
+                    {planId === 'core' && <Package className="w-6 h-6 text-white" />}
+                    {planId === 'pro' && <Zap className="w-6 h-6 text-white" />}
                   </div>
                   
-                  <h4 className="font-bold mb-1">{plan.displayName}</h4>
-                  <div className="flex items-baseline gap-1 mb-3">
-                    <span className="text-2xl font-bold">${plan.price}</span>
-                    <span className="text-sm text-muted-foreground">/mo</span>
-                  </div>
-                  
-                  <div className="mb-3 p-2 bg-background rounded-lg">
-                    <p className="text-sm font-medium">{plan.credits} minutes/mo</p>
-                    {plan.payAsYouGoRate && (
-                      <p className="text-xs text-muted-foreground">
-                        PAYG: ${plan.payAsYouGoRate}/min
-                      </p>
+                  <h4 className="text-xl font-bold mb-2">{plan.displayName}</h4>
+                  <div className="flex items-baseline gap-1 mb-4">
+                    <span className="text-3xl font-bold">${plan.price}</span>
+                    {plan.price > 0 && (
+                      <span className="text-sm text-muted-foreground">/month</span>
                     )}
                   </div>
+                  
+                  {isFreeTrial && (
+                    <div className="mb-4 p-2 bg-blue-50 rounded-lg border border-blue-200">
+                      <p className="text-xs font-semibold text-blue-900">7-Day Trial</p>
+                      <p className="text-sm font-bold text-blue-700">New users only</p>
+                    </div>
+                  )}
+                  
+                  <div className="mb-4 p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-100">
+                    <p className="text-sm font-semibold text-purple-900 mb-1">AI Companion Time</p>
+                    <p className="text-lg font-bold text-purple-700">{plan.creditsDisplay}</p>
+                    <p className="text-xs text-purple-600">
+                      {isFreeTrial ? 'One-time trial' : 'Refreshes monthly'}
+                    </p>
+                  </div>
+
+                  {plan.payAsYouGoRate && (
+                    <div className="mb-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                      <p className="text-xs font-semibold text-green-900 mb-1">Pay-As-You-Go</p>
+                      <p className="text-sm font-bold text-green-700">{plan.payAsYouGoDisplay}</p>
+                    </div>
+                  )}
+
+                  <ul className="space-y-2 mb-4 text-sm">
+                    {plan.features.slice(0, 4).map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-muted-foreground">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
 
                   {isCurrent ? (
-                    <div className="flex items-center justify-center gap-2 py-2 bg-purple-100 text-purple-700 rounded-lg font-medium">
-                      <Check className="w-4 h-4" />
+                    <div className="flex items-center justify-center gap-2 py-3 bg-purple-100 text-purple-700 rounded-lg font-semibold">
+                      <Check className="w-5 h-5" />
                       Current Plan
+                    </div>
+                  ) : isFreeTrial ? (
+                    <div className="flex items-center justify-center gap-2 py-3 bg-gray-100 text-gray-500 rounded-lg font-medium cursor-not-allowed">
+                      <AlertCircle className="w-4 h-4" />
+                      Trial Ended
                     </div>
                   ) : (
                     <Button 
                       className="w-full" 
                       variant={planId === 'pro' ? 'default' : 'outline'}
                       onClick={() => setShowUpgradeModal(true)}
+                      size="lg"
                     >
-                      {SUBSCRIPTION_PLANS[planId].price > currentPlan.price ? 'Upgrade' : 'Switch'}
+                      {SUBSCRIPTION_PLANS[planId].price > currentPlan.price ? 'Upgrade' : 'Downgrade'}
                       <ChevronRight className="w-4 h-4 ml-1" />
                     </Button>
                   )}
@@ -362,15 +394,15 @@ export function Billing() {
                 </div>
                 <h3 className="text-2xl font-bold mb-2">Buy Additional Minutes</h3>
                 <p className="text-muted-foreground">
-                  Your rate: <span className="font-bold text-green-600">${currentPlan.payAsYouGoRate}/minute</span>
+                  <span className="font-bold text-green-600">$5 per 25 Minutes</span> • Minutes expire monthly
                 </p>
               </div>
 
               {/* Minutes Selector */}
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-3">How many minutes?</label>
+                <label className="block text-sm font-medium mb-3">Select Package</label>
                 <div className="grid grid-cols-3 gap-3 mb-4">
-                  {[30, 60, 120].map((mins) => (
+                  {[25, 50, 100].map((mins) => (
                     <button
                       key={mins}
                       onClick={() => setPaygMinutes(mins)}
@@ -382,6 +414,7 @@ export function Billing() {
                     >
                       <p className="font-bold">{mins}</p>
                       <p className="text-xs text-muted-foreground">minutes</p>
+                      <p className="text-xs text-green-600 mt-1">${(Math.ceil(mins / 25) * 5)}</p>
                     </button>
                   ))}
                 </div>
@@ -389,9 +422,9 @@ export function Billing() {
                 <div className="flex items-center gap-3">
                   <input
                     type="range"
-                    min="15"
-                    max="300"
-                    step="15"
+                    min="25"
+                    max="200"
+                    step="25"
                     value={paygMinutes}
                     onChange={(e) => setPaygMinutes(Number(e.target.value))}
                     className="flex-1"
@@ -404,16 +437,19 @@ export function Billing() {
               <div className="mb-6 p-4 bg-green-50 rounded-xl border-2 border-green-200">
                 <div className="flex justify-between mb-2">
                   <span className="text-muted-foreground">Minutes:</span>
-                  <span className="font-semibold">{paygMinutes}</span>
+                  <span className="font-semibold">{paygPackages * 25} ({(paygPackages * 25 / 60).toFixed(2)} Hours)</span>
                 </div>
                 <div className="flex justify-between mb-2">
-                  <span className="text-muted-foreground">Rate:</span>
-                  <span className="font-semibold">${currentPlan.payAsYouGoRate}/min</span>
+                  <span className="text-muted-foreground">Packages:</span>
+                  <span className="font-semibold">{paygPackages} × $5</span>
                 </div>
                 <div className="border-t border-green-300 pt-2 mt-2 flex justify-between">
                   <span className="font-bold text-green-900">Total:</span>
                   <span className="text-2xl font-bold text-green-700">${paygCost.toFixed(2)}</span>
                 </div>
+                <p className="text-xs text-green-600 mt-2">
+                  ⚠️ PAYG minutes expire at end of billing cycle
+                </p>
               </div>
 
               {/* Actions */}

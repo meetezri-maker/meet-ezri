@@ -363,12 +363,12 @@ export function Landing() {
               Choose Your <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Wellness Journey</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Start with a 7-day free trial. Upgrade anytime for more AI companion time and better pay-as-you-go rates.
+              Start with a 7-day free trial. Upgrade for mood tracking, journaling, and wellness tools.
             </p>
           </motion.div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+        <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
           {(Object.keys(SUBSCRIPTION_PLANS) as PlanTier[]).map((planId, index) => {
             const plan = SUBSCRIPTION_PLANS[planId];
             const isPopular = plan.popular;
@@ -448,14 +448,11 @@ export function Landing() {
                           </span>
                         </div>
                         <p className="text-lg font-bold text-green-700">
-                          ${plan.payAsYouGoRate}/min
+                          ${plan.payAsYouGoRate} per 25 min
                         </p>
-                        {planId === 'pro' && (
-                          <p className="text-xs text-green-600 mt-1">40% savings vs Basic</p>
-                        )}
-                        {planId === 'enterprise' && (
-                          <p className="text-xs text-green-600 mt-1">60% savings vs Basic</p>
-                        )}
+                        <p className="text-xs text-green-600 mt-1">
+                          Add extra minutes anytime
+                        </p>
                       </div>
                     ) : (
                       <div className="mb-6 p-3 bg-gray-50 rounded-lg border border-gray-200">
@@ -526,8 +523,8 @@ export function Landing() {
                 </h4>
                 <p className="text-sm text-blue-700">
                   Start with a free trial, upgrade or downgrade anytime. Cancel whenever you want. 
-                  Higher-tier plans get better pay-as-you-go rates when you need extra minutes. 
-                  All plans include access to our AI companions, mood tracking, and wellness tools.
+                  PAYG available on Core & Pro plans at a flat $5 per 25 minutes rate. 
+                  Core & Pro plans include mood tracking, journaling, and wellness tools.
                 </p>
               </div>
             </div>
