@@ -263,7 +263,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       <MobileBottomNav />
 
       {/* Desktop Sidebar - Hidden on mobile */}
-      <div className="hidden sm:block fixed left-0 top-16 bottom-0 w-64 bg-white/80 backdrop-blur-lg border-r border-gray-200 z-30">
+      <div className="hidden sm:block fixed left-0 top-16 bottom-0 w-64 bg-white/80 backdrop-blur-lg border-r border-gray-200 z-30 overflow-y-auto">
         <nav className="p-4 space-y-2">
           {navItems.map((item, index) => {
             const Icon = item.icon;
