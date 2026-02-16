@@ -26,7 +26,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/app/components/ui/button";
-import avatarImage from "figma:asset/04c1dd5237123f8117f9583a92470e6c6f222b03.png";
+// Avatar placeholder - using emoji like other parts of the app
 import { useSafety } from "@/app/contexts/SafetyContext";
 import { analyzeTextForSafety } from "@/app/utils/safetyDetection";
 import { SafetyStateIndicator } from "@/app/components/safety/SafetyStateIndicator";
@@ -302,10 +302,8 @@ export function ActiveSession() {
                 ease: "easeInOut"
               }}
             >
-              <motion.img
-                src={avatarImage}
-                alt={currentAvatar.name}
-                className="w-auto h-full max-w-none object-contain"
+              <motion.div 
+                className="w-auto h-full max-w-none object-contain flex items-center justify-center text-9xl"
                 animate={{
                   // Subtle scale animation when speaking
                   scale: isEzriSpeaking ? [1, 1.02, 1, 1.01, 1] : 1,
@@ -319,7 +317,9 @@ export function ActiveSession() {
                   filter: isEzriSpeaking ? 'brightness(1.1)' : 'brightness(1)',
                   transition: 'filter 0.5s ease-in-out'
                 }}
-              />
+              >
+                👩‍⚕️
+              </motion.div>
 
               {/* Animated Border Glow when Speaking */}
               {isEzriSpeaking && (
