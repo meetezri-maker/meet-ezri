@@ -311,7 +311,6 @@ export function AdminLayoutNew({ children }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/20 to-slate-50">
-      {/* Mobile backdrop */}
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div
@@ -324,8 +323,11 @@ export function AdminLayoutNew({ children }: AdminLayoutProps) {
         )}
       </AnimatePresence>
 
-      {/* SIDEBAR - Apple Style: Clean & Minimal */}
-      <aside className="fixed top-0 left-0 bottom-0 w-64 bg-gray-50/80 backdrop-blur-xl border-r border-gray-200/60 z-50 overflow-hidden">
+      <aside
+        className={`fixed top-0 left-0 bottom-0 w-64 bg-gray-50/80 backdrop-blur-xl border-r border-gray-200/60 z-50 overflow-hidden transform transition-transform duration-300 ease-in-out ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0`}
+      >
         <div className="flex flex-col h-full">
           {/* Header - Compact */}
           <div className="px-5 py-4 border-b border-gray-200/60">
@@ -432,12 +434,19 @@ export function AdminLayoutNew({ children }: AdminLayoutProps) {
         </div>
       </aside>
 
-      {/* Main Content */}
-      <div className="pl-64">
-        {/* Top Bar */}
+      <div className="lg:pl-64">
         <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-lg border-b border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between px-8 py-4">
-            <h2 className="text-lg font-bold text-gray-800">Admin Portal</h2>
+          <div className="flex items-center justify-between px-4 lg:px-8 py-4">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setSidebarOpen((prev) => !prev)}
+                className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100 lg:hidden"
+              >
+                {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              </button>
+              <h2 className="text-lg font-bold text-gray-800">Admin Portal</h2>
+            </div>
             <Link to="/app/dashboard" className="text-sm text-primary hover:underline font-medium">
               View User App →
             </Link>
