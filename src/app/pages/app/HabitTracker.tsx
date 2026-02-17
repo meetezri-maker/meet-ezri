@@ -217,6 +217,25 @@ export function HabitTracker() {
     }));
   };
 
+  const toggleWeekDay = (habitId: string, dayIndex: number) => {
+    setHabits(habits.map(habit => {
+      if (habit.id === habitId) {
+        const newWeekProgress = [...habit.weekProgress];
+        newWeekProgress[dayIndex] = !newWeekProgress[dayIndex];
+        
+        // Recalculate completedThisWeek
+        const completedThisWeek = newWeekProgress.filter(day => day).length;
+        
+        return {
+          ...habit,
+          weekProgress: newWeekProgress,
+          completedThisWeek
+        };
+      }
+      return habit;
+    }));
+  };
+
   const totalHabits = habits.length;
   const completedToday = habits.filter(h => h.completedToday).length;
   const completionRate = Math.round((completedToday / totalHabits) * 100);
@@ -371,19 +390,22 @@ export function HabitTracker() {
                     {/* Week Progress */}
                     <div className="hidden sm:flex items-center gap-1">
                       {habit.weekProgress.map((completed, i) => (
-                        <div
+                        <motion.button
                           key={i}
-                          className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => toggleWeekDay(habit.id, i)}
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-all ${
                             completed
-                              ? `bg-gradient-to-br ${habit.color} text-white`
-                              : "bg-gray-100"
+                              ? `bg-gradient-to-br ${habit.color} text-white shadow-md`
+                              : "bg-gray-100 hover:bg-gray-200"
                           }`}
-                          title={weekDays[i]}
+                          title={`${weekDays[i]} - Click to toggle`}
                         >
                           <span className="text-xs font-medium">
                             {completed ? "✓" : weekDays[i][0]}
                           </span>
-                        </div>
+                        </motion.button>
                       ))}
                     </div>
 
