@@ -990,22 +990,23 @@ export function ActiveSession() {
       <SafetyStateIndicator currentState={currentState} />
 
       {/* Pause Session Button */}
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setIsSessionPaused(!isSessionPaused)}
-        className={`absolute bottom-16 left-16 w-16 h-16 rounded-full flex items-center justify-center transition-all ${
-          isSessionPaused
-            ? "bg-green-500 hover:bg-green-600"
-            : "bg-white/10 hover:bg-white/20 border-2 border-white/20"
-        }`}
-      >
-        {isSessionPaused ? (
-          <Play className="w-7 h-7 text-white" />
-        ) : (
-          <Pause className="w-7 h-7 text-white" />
-        )}
-      </motion.button>
+     <motion.button
+  whileHover={{ scale: 1.05 }}
+  whileTap={{ scale: 0.95 }}
+  onClick={() => setIsSessionPaused(!isSessionPaused)}
+  className={`absolute bottom-36 left-4 sm:bottom-16 sm:left-16 w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center transition-all z-10 ${
+    isSessionPaused
+      ? "bg-green-500 hover:bg-green-600"
+      : "bg-white/10 hover:bg-white/20 border-2 border-white/20"
+  }`}
+>
+
+  {isSessionPaused ? (
+    <Play className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+  ) : (
+    <Pause className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+  )}
+</motion.button>
     </div>
   );
 }
