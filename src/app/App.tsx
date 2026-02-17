@@ -169,10 +169,10 @@ export default function App() {
           {/* Public Routes */}
           <Route path="/" element={<Landing />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/pricing" element={<Pricing />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/accessibility" element={<Accessibility />} />
-          <Route path="/pricing" element={<Pricing />} />
           
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />

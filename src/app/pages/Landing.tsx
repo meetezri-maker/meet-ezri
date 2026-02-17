@@ -4,12 +4,19 @@ import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { AnimatedCard } from "../components/AnimatedCard";
 import { FloatingElement } from "../components/FloatingElement";
-import { motion } from "motion/react";
-import { Heart, Video, Shield, Clock, Sparkles, CheckCircle2, ArrowRight, Star, Zap, Check, Crown } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { Heart, Video, Shield, Clock, Sparkles, CheckCircle2, ArrowRight, Star, Zap, Check, Crown, ChevronDown } from "lucide-react";
 import { SUBSCRIPTION_PLANS } from "../utils/subscriptionPlans";
 import type { PlanTier } from "../utils/subscriptionPlans";
+import { useState } from "react";
 
 export function Landing() {
+  const [expandedPlan, setExpandedPlan] = useState<PlanTier | null>(null);
+
+  const togglePlan = (planId: PlanTier) => {
+    setExpandedPlan(expandedPlan === planId ? null : planId);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-purple-50/30 to-white overflow-hidden">
       <PublicNav />
@@ -466,8 +473,8 @@ export function Landing() {
                     )}
 
                     {/* Features */}
-                    <ul className="space-y-3 mb-8 flex-grow">
-                      {plan.features.slice(0, 5).map((feature, idx) => (
+                    <ul className="space-y-3 mb-6 flex-grow">
+                      {(expandedPlan === planId ? plan.features : plan.features.slice(0, 5)).map((feature, idx) => (
                         <li key={idx} className="flex items-start gap-2">
                           <Check className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
                             isPopular ? 'text-purple-600' : 'text-green-600'
@@ -477,16 +484,25 @@ export function Landing() {
                       ))}
                     </ul>
 
-                    {/* Read More Button */}
-                    <Link to="/pricing" className="block mb-4">
-                      <Button 
-                        variant="outline"
-                        className="w-full text-sm"
-                        size="sm"
+                    {/* Expand/Collapse Button */}
+                    {plan.features.length > 5 && (
+                      <button
+                        onClick={() => togglePlan(planId)}
+                        className="w-full mb-4 py-2 px-4 border border-border rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
                       >
-                        View All Features
-                      </Button>
-                    </Link>
+                        {expandedPlan === planId ? (
+                          <>
+                            Show Less
+                            <ChevronDown className="w-4 h-4 rotate-180 transition-transform" />
+                          </>
+                        ) : (
+                          <>
+                            View All {plan.features.length} Features
+                            <ChevronDown className="w-4 h-4 transition-transform" />
+                          </>
+                        )}
+                      </button>
+                    )}
 
                     {/* CTA Button */}
                     <Link to="/signup" className="block">
