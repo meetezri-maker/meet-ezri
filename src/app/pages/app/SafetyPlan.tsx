@@ -106,25 +106,144 @@ export function SafetyPlan() {
 
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [newItem, setNewItem] = useState("");
+  const [copiedSection, setCopiedSection] = useState<string | null>(null);
 
-  const handleAddItem = (sectionId: string) => {
-    if (newItem.trim()) {
-      setSections(sections.map(section => 
-        section.id === sectionId 
-          ? { ...section, items: [...section.items, newItem.trim()] }
-          : section
-      ));
-      setNewItem("");
-      setEditingSection(null);
-    }
+  const handleAddItem = (sectionId: string, newItem: string) => {
+    if (!newItem.trim()) return;
+    
+    setSections(sections.map(section => 
+      section.id === sectionId
+        ? { ...section, items: [...section.items, newItem] }
+        : section
+    ));
   };
 
   const handleDeleteItem = (sectionId: string, itemIndex: number) => {
     setSections(sections.map(section => 
-      section.id === sectionId 
+      section.id === sectionId
         ? { ...section, items: section.items.filter((_, i) => i !== itemIndex) }
         : section
     ));
+  };
+
+  const handleCopySection = (sectionId: string) => {
+    const section = sections.find(s => s.id === sectionId);
+    if (!section) return;
+
+    const text = `${section.title}\n${section.items.map(item => `• ${item}`).join('\n')}`;
+    navigator.clipboard.writeText(text);
+    setCopiedSection(sectionId);
+    setTimeout(() => setCopiedSection(null), 2000);
+  };
+
+  const handleDownloadPDF = () => {
+    // Create a styled HTML content for printing
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>My Safety Plan - Ezri</title>
+          <style>
+            body {
+              font-family: system-ui, -apple-system, sans-serif;
+              max-width: 800px;
+              margin: 40px auto;
+              padding: 20px;
+              color: #333;
+            }
+            h1 {
+              color: #6366f1;
+              border-bottom: 3px solid #6366f1;
+              padding-bottom: 10px;
+              margin-bottom: 30px;
+            }
+            h2 {
+              color: #4f46e5;
+              margin-top: 30px;
+              margin-bottom: 15px;
+              font-size: 20px;
+            }
+            ul {
+              list-style: none;
+              padding: 0;
+            }
+            li {
+              padding: 10px;
+              margin: 8px 0;
+              background: #f9fafb;
+              border-left: 4px solid #6366f1;
+              border-radius: 4px;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 40px;
+            }
+            .footer {
+              margin-top: 50px;
+              padding-top: 20px;
+              border-top: 2px solid #e5e7eb;
+              text-align: center;
+              color: #6b7280;
+              font-size: 14px;
+            }
+            .emergency {
+              background: #fee2e2;
+              border: 2px solid #ef4444;
+              padding: 20px;
+              border-radius: 8px;
+              margin: 30px 0;
+              text-align: center;
+            }
+            .emergency strong {
+              color: #dc2626;
+              font-size: 18px;
+            }
+            @media print {
+              body { margin: 20px; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>🛡️ My Safety Plan</h1>
+            <p>Created with Ezri Mental Health App</p>
+            <p><em>Date: ${new Date().toLocaleDateString()}</em></p>
+          </div>
+
+          ${sections.map(section => `
+            <div>
+              <h2>${section.title}</h2>
+              <ul>
+                ${section.items.map(item => `<li>${item}</li>`).join('')}
+              </ul>
+            </div>
+          `).join('')}
+
+          <div class="emergency">
+            <strong>🚨 EMERGENCY CONTACTS</strong>
+            <p>National Suicide Prevention Lifeline: 988</p>
+            <p>Crisis Text Line: Text HOME to 741741</p>
+            <p>Emergency Services: 911</p>
+          </div>
+
+          <div class="footer">
+            <p>This safety plan is personal and confidential.</p>
+            <p>Keep it in a place where you can easily access it when needed.</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    // Open print dialog which allows saving as PDF
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+      }, 250);
+    }
   };
 
   return (
@@ -256,12 +375,12 @@ export function SafetyPlan() {
                         type="text"
                         value={newItem}
                         onChange={(e) => setNewItem(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleAddItem(section.id)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleAddItem(section.id, newItem)}
                         placeholder={section.placeholder}
                         className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                         autoFocus
                       />
-                      <Button onClick={() => handleAddItem(section.id)}>
+                      <Button onClick={() => handleAddItem(section.id, newItem)}>
                         Add
                       </Button>
                       <Button 
@@ -310,7 +429,7 @@ export function SafetyPlan() {
                 <Button variant="outline" onClick={() => window.print()}>
                   Print Plan
                 </Button>
-                <Button>
+                <Button onClick={handleDownloadPDF}>
                   Download PDF
                 </Button>
               </div>

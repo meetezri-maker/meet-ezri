@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { AppLayout } from '@/app/components/AppLayout';
-import { Trophy, Award, Star, Lock, Calendar, TrendingUp, Target, Zap, Heart, Brain, Moon, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Trophy, Award, Star, Lock, Calendar, TrendingUp, Target, Zap, Heart, Brain, Moon, CheckCircle } from 'lucide-react';
 import { AnimatedCard } from '@/app/components/AnimatedCard';
-import { Link } from 'react-router-dom';
 
 interface Achievement {
   id: string;
@@ -180,14 +179,6 @@ export function Achievements() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="mb-8">
-            <Link 
-              to="/app/settings" 
-              className="inline-flex items-center gap-2 text-gray-700 hover:text-gray-900 mb-6 transition-colors font-medium"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              Back to Settings
-            </Link>
-            
             <div className="flex items-center gap-3 mb-2">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center">
                 <Trophy className="w-6 h-6 text-white" />
@@ -284,7 +275,7 @@ export function Achievements() {
                 <AnimatedCard key={achievement.id} delay={index * 0.05}>
                   <motion.div
                     whileHover={{ scale: 1.02 }}
-                    className={`relative bg-white rounded-2xl border-2 ${
+                    className={`relative bg-white rounded-2xl border-2 h-full min-h-[280px] flex flex-col ${
                       isUnlocked ? rarityBorders[achievement.rarity] : 'border-gray-200'
                     } p-6 overflow-hidden hover:shadow-lg transition-all ${!isUnlocked && 'opacity-60'}`}
                   >
@@ -294,7 +285,7 @@ export function Achievements() {
                     )}
 
                     {/* Content */}
-                    <div className="relative">
+                    <div className="relative flex-1 flex flex-col">
                       <div className="flex items-start justify-between mb-4">
                         <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
                           isUnlocked 
@@ -316,7 +307,7 @@ export function Achievements() {
                       </div>
 
                       <h3 className="text-lg font-bold text-gray-900 mb-2">{achievement.title}</h3>
-                      <p className="text-sm text-gray-600 mb-4">{achievement.description}</p>
+                      <p className="text-sm text-gray-600 mb-4 flex-1">{achievement.description}</p>
 
                       {/* Progress Bar */}
                       <div className="mb-3">
