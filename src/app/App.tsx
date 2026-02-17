@@ -6,6 +6,7 @@ import { SafetyProvider } from '@/app/contexts/SafetyContext';
 // Components
 import { Toaster } from '@/app/components/ui/sonner';
 import { MobileMetaTags } from '@/app/components/MobileMetaTags';
+import { ScrollToTop } from '@/app/components/ScrollToTop';
 
 // Public Pages
 import { Landing } from '@/app/pages/Landing';
@@ -165,6 +166,7 @@ export default function App() {
       <BrowserRouter>
         <MobileMetaTags />
         <Toaster />
+        <ScrollToTop />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Landing />} />
