@@ -467,7 +467,7 @@ export function Landing() {
 
                     {/* Features */}
                     <ul className="space-y-3 mb-8 flex-grow">
-                      {plan.features.map((feature, idx) => (
+                      {plan.features.slice(0, 5).map((feature, idx) => (
                         <li key={idx} className="flex items-start gap-2">
                           <Check className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
                             isPopular ? 'text-purple-600' : 'text-green-600'
@@ -476,6 +476,17 @@ export function Landing() {
                         </li>
                       ))}
                     </ul>
+
+                    {/* Read More Button */}
+                    <Link to="/pricing" className="block mb-4">
+                      <Button 
+                        variant="outline"
+                        className="w-full text-sm"
+                        size="sm"
+                      >
+                        View All Features
+                      </Button>
+                    </Link>
 
                     {/* CTA Button */}
                     <Link to="/signup" className="block">

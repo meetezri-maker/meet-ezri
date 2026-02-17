@@ -13,6 +13,7 @@ import { HowItWorks } from '@/app/pages/HowItWorks';
 import { Privacy } from '@/app/pages/Privacy';
 import { Terms } from '@/app/pages/Terms';
 import { Accessibility } from '@/app/pages/Accessibility';
+import { Pricing } from '@/app/pages/Pricing';
 
 // Auth Pages
 import { Login } from '@/app/pages/Login';
@@ -171,6 +172,7 @@ export default function App() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/accessibility" element={<Accessibility />} />
+          <Route path="/pricing" element={<Pricing />} />
           
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />
