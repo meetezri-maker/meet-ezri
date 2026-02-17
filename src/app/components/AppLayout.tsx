@@ -20,7 +20,8 @@ import {
   X,
   Award,
   HelpCircle,
-  Shield
+  Shield,
+  BarChart3
 } from "lucide-react";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { useState } from "react";
@@ -44,6 +45,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   // Additional menu items for desktop and mobile drawer
   const additionalItems = [
+    { path: "/app/mood-history", icon: BarChart3, label: "Mood History" },
     { path: "/app/session-history", icon: Clock, label: "Session History" },
     { path: "/app/wellness-tools", icon: Sparkles, label: "Wellness Tools" },
     { path: "/app/progress", icon: TrendingUp, label: "Progress" },

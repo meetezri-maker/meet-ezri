@@ -59,6 +59,44 @@ export function MoodHistory() {
     { day: "Sun", mood: 9, intensity: 4 }
   ];
 
+  const monthlyData = [
+    { day: "Week 1", mood: 7.2, intensity: 5.5 },
+    { day: "Week 2", mood: 7.8, intensity: 6.0 },
+    { day: "Week 3", mood: 6.5, intensity: 6.8 },
+    { day: "Week 4", mood: 8.1, intensity: 4.5 }
+  ];
+
+  const yearlyData = [
+    { day: "Jan", mood: 6.5, intensity: 6.2 },
+    { day: "Feb", mood: 7.0, intensity: 5.8 },
+    { day: "Mar", mood: 7.5, intensity: 5.5 },
+    { day: "Apr", mood: 7.8, intensity: 5.2 },
+    { day: "May", mood: 8.0, intensity: 5.0 },
+    { day: "Jun", mood: 7.6, intensity: 5.4 },
+    { day: "Jul", mood: 7.9, intensity: 5.1 },
+    { day: "Aug", mood: 8.2, intensity: 4.8 },
+    { day: "Sep", mood: 7.7, intensity: 5.3 },
+    { day: "Oct", mood: 7.4, intensity: 5.6 },
+    { day: "Nov", mood: 7.8, intensity: 5.2 },
+    { day: "Dec", mood: 8.1, intensity: 4.9 }
+  ];
+
+  // Select the appropriate data based on the view
+  const getChartData = () => {
+    switch (selectedView) {
+      case "week":
+        return weeklyData;
+      case "month":
+        return monthlyData;
+      case "year":
+        return yearlyData;
+      default:
+        return weeklyData;
+    }
+  };
+
+  const chartData = getChartData();
+
   const moodDistribution = [
     { name: "Happy", value: 35, color: "#fbbf24" },
     { name: "Calm", value: 30, color: "#3b82f6" },
@@ -197,7 +235,7 @@ export function MoodHistory() {
             <Card className="p-6 shadow-xl">
               <h2 className="text-xl font-bold mb-4">Mood Trend</h2>
               <ResponsiveContainer width="100%" height={250}>
-                <LineChart data={weeklyData}>
+                <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis dataKey="day" stroke="#6b7280" />
                   <YAxis stroke="#6b7280" />
@@ -264,7 +302,7 @@ export function MoodHistory() {
           <Card className="p-6 shadow-xl">
             <h2 className="text-xl font-bold mb-4">Emotion Intensity</h2>
             <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={weeklyData}>
+              <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="day" stroke="#6b7280" />
                 <YAxis stroke="#6b7280" />
