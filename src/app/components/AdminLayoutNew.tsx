@@ -310,7 +310,7 @@ export function AdminLayoutNew({ children }: AdminLayoutProps) {
   const RoleIcon = currentRoleInfo.icon;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/20 to-slate-50">
+    <div className="admin-layout min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/20 to-slate-50">
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div
