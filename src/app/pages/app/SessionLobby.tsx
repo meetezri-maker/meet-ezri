@@ -28,6 +28,12 @@ export function SessionLobby() {
   const [selectedAvatar, setSelectedAvatar] = useState("Alex");
   const [scheduleDate, setScheduleDate] = useState("");
   const [scheduleTime, setScheduleTime] = useState("");
+  const [checklist, setChecklist] = useState([
+    { label: "Find a quiet, private space", checked: true },
+    { label: "Check your audio/video", checked: true },
+    { label: "Take a few deep breaths", checked: false },
+    { label: "Set your intention for this session", checked: false }
+  ]);
 
   const voices = [
     { id: "voice1", name: "Voice 1", description: "Warm and friendly", gender: "Female" },
@@ -45,12 +51,11 @@ export function SessionLobby() {
 
   const durations = [15, 30, 45, 60];
 
-  const preSessionChecklist = [
-    { label: "Find a quiet, private space", checked: true },
-    { label: "Check your audio/video", checked: true },
-    { label: "Take a few deep breaths", checked: false },
-    { label: "Set your intention for this session", checked: false }
-  ];
+  const toggleChecklistItem = (index: number) => {
+    setChecklist(prev => prev.map((item, i) => 
+      i === index ? { ...item, checked: !item.checked } : item
+    ));
+  };
 
   const upcomingSessions = [
     {
@@ -224,25 +229,28 @@ export function SessionLobby() {
               <Card className="p-6 shadow-xl">
                 <h2 className="text-xl font-bold mb-4">Before You Start</h2>
                 <div className="space-y-3">
-                  {preSessionChecklist.map((item, index) => (
+                  {checklist.map((item, index) => (
                     <motion.div
                       key={index}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.6 + index * 0.05 }}
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                      onClick={() => toggleChecklistItem(index)}
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                     >
-                      <div
-                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all ${
                           item.checked
                             ? "bg-green-500 border-green-500"
-                            : "border-gray-300"
+                            : "border-gray-300 hover:border-green-400"
                         }`}
                       >
                         {item.checked && (
-                          <CheckCircle className="w-4 h-4 text-white" />
+                          <Check className="w-4 h-4 text-white" />
                         )}
-                      </div>
+                      </motion.div>
                       <span className={item.checked ? "text-muted-foreground line-through" : ""}>
                         {item.label}
                       </span>
