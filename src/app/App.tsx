@@ -183,7 +183,7 @@ export default function App() {
           <Route path="/onboarding/welcome" element={<OnboardingWelcome />} />
           <Route path="/onboarding/profile" element={<OnboardingProfileSetup />} />
           <Route path="/onboarding/wellness-baseline" element={<OnboardingWellnessBaseline />} />
-          <Route path="/onboarding/health-background" element={<OnboardingHealthBackground />} />
+          {/* <Route path="/onboarding/health-background" element={<OnboardingHealthBackground />} /> */}
           <Route path="/onboarding/avatar-preferences" element={<OnboardingAvatarPreferences />} />
           <Route path="/onboarding/safety-consent" element={<OnboardingSafetyConsent />} />
           <Route path="/onboarding/emergency-contact" element={<OnboardingEmergencyContact />} />

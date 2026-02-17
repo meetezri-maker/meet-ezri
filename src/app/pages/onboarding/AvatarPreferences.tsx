@@ -298,7 +298,7 @@ export function OnboardingAvatarPreferences() {
           transition={{ delay: 1 }}
           className="flex gap-3"
         >
-          <Link to="/onboarding/health-background" className="flex-1">
+          <Link to="/onboarding/wellness-baseline" className="flex-1">
             <Button type="button" variant="outline" className="w-full group">
               <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
               Back

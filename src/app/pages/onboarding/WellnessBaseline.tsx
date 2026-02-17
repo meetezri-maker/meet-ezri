@@ -142,22 +142,15 @@ export function OnboardingWellnessBaseline() {
             </Button>
           </Link>
 
-          <Link to="/onboarding/health-background" className="flex-1">
+          <Link to="/onboarding/avatar-preferences" className="flex-1">
             <motion.div
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              className="w-full"
             >
-              <Button className="w-full group relative overflow-hidden">
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  Continue
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </span>
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-accent to-secondary"
-                  initial={{ x: "-100%" }}
-                  whileHover={{ x: 0 }}
-                  transition={{ duration: 0.3 }}
-                />
+              <Button type="submit" className="w-full group">
+                Continue
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </motion.div>
           </Link>

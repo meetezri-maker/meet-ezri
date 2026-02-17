@@ -50,15 +50,12 @@ interface Webhook {
 }
 
 export function IntegrationSettings() {
-  const [showApiKeys, setShowApiKeys] = useState<{ [key: string]: boolean }>({});
   const [showAddIntegrationModal, setShowAddIntegrationModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showAddWebhookModal, setShowAddWebhookModal] = useState(false);
-  const [showEditWebhookModal, setShowEditWebhookModal] = useState(false);
-  const [showDeleteWebhookModal, setShowDeleteWebhookModal] = useState(false);
+  const [showWebhookModal, setShowWebhookModal] = useState(false);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null);
-  const [selectedWebhook, setSelectedWebhook] = useState<Webhook | null>(null);
+  const [showAddApiKey, setShowAddApiKey] = useState(false);
+  const [showEditApiKey, setShowEditApiKey] = useState(false);
 
   const [integrations, setIntegrations] = useState<Integration[]>([
     {

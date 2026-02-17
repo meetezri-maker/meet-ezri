@@ -4,7 +4,7 @@ import { Input } from "../components/ui/input";
 import { Card } from "../components/ui/card";
 import { Label } from "../components/ui/label";
 import { Link, useNavigate } from "react-router";
-import { Heart, ArrowRight } from "lucide-react";
+import { Heart, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { motion } from "motion/react";
 import { FloatingElement } from "../components/FloatingElement";
 import { PublicNav } from "../components/PublicNav";
@@ -13,6 +13,7 @@ export function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,15 +127,28 @@ export function Login() {
                     Forgot?
                   </Link>
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  className="bg-input-background transition-all focus:scale-[1.02]"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    className="bg-input-background transition-all focus:scale-[1.02]"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-500"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
               </motion.div>
               
               <motion.div

@@ -4,7 +4,7 @@ import { Input } from "../components/ui/input";
 import { Card } from "../components/ui/card";
 import { Label } from "../components/ui/label";
 import { Link, useNavigate } from "react-router";
-import { Heart, CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
+import { Heart, CheckCircle2, ArrowRight, Sparkles, Eye, EyeOff } from "lucide-react";
 import { motion } from "motion/react";
 import { FloatingElement } from "../components/FloatingElement";
 import { PublicNav } from "../components/PublicNav";
@@ -16,6 +16,8 @@ export function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -211,16 +213,29 @@ export function Signup() {
                   className="space-y-2"
                 >
                   <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="At least 8 characters"
-                    className="bg-input-background transition-all focus:scale-[1.02]"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={8}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="At least 8 characters"
+                      className="bg-input-background transition-all focus:scale-[1.02]"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={8}
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-500"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
                 </motion.div>
                 
                 <motion.div
@@ -230,15 +245,28 @@ export function Signup() {
                   className="space-y-2"
                 >
                   <Label htmlFor="confirmPassword">Confirm Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="Re-enter your password"
-                    className="bg-input-background transition-all focus:scale-[1.02]"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Re-enter your password"
+                      className="bg-input-background transition-all focus:scale-[1.02]"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-500"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
                 </motion.div>
                 
                 <motion.div
