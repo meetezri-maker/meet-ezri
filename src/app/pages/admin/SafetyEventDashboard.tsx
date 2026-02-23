@@ -17,7 +17,7 @@ import { getSafetyEvents, getCriticalSafetyEvents, clearSafetyEvents } from '@/a
 import { SafetyEvent, SafetyState } from '@/app/types/safety';
 import { Search, Filter, Download, RefreshCw, AlertTriangle, TrendingUp, Shield } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 
 export function SafetyEventDashboard() {

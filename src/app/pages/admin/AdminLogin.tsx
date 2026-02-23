@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { Heart, ArrowRight, Shield, Crown, Building2, Users, Eye, EyeOff, Home, ArrowLeft } from "lucide-react";
 import { Card } from "../../components/ui/card";

@@ -13,7 +13,7 @@ import {
   AlertTriangle,
   Ban,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 export function UserDetails() {
   return (

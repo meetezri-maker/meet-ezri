@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { AdminLayoutNew } from "../../components/AdminLayoutNew";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import { useState } from "react";
 
 export function TwoFactorAuth() {

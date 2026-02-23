@@ -2,7 +2,7 @@ import { AppLayout } from "../../components/AppLayout";
 import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { motion } from "motion/react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import {
   Heart,
   Plus,

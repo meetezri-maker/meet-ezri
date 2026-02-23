@@ -1,32 +1,38 @@
+import { Link, useNavigate } from "react-router";
+import { useState, useEffect } from "react";
+import { motion } from "motion/react";
 import { AdminLayoutNew } from "../../components/AdminLayoutNew";
 import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
-import { motion } from "motion/react";
 import {
+  Crown,
   Users,
   Building2,
-  Globe,
-  TrendingUp,
-  Activity,
-  Server,
-  AlertTriangle,
+  Video,
   DollarSign,
-  Crown,
-  ArrowUpRight,
-  CheckCircle2,
-  Clock,
+  TrendingUp,
+  TrendingDown,
+  Download,
   Settings,
-  Zap,
+  Activity,
+  Globe,
+  Smartphone,
+  Monitor,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  ArrowRight,
+  Eye,
+  Server,
+  BarChart3,
+  AlertTriangle,
+  UserCheck,
   Shield,
   MessageSquare,
-  UserCheck,
-  BarChart3,
-  Bell,
-  Eye,
-  Download,
+  ArrowUpRight,
+  Zap,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -53,6 +59,36 @@ export function SuperAdminDashboard() {
   const [orgCount, setOrgCount] = useState(2800);
   const [sessionCount, setSessionCount] = useState(8300);
   const [revenue, setRevenue] = useState(284);
+
+  // Export function
+  const handleExportReport = () => {
+    const reportData = {
+      generatedAt: new Date().toISOString(),
+      summary: {
+        totalUsers: userCount,
+        totalOrganizations: orgCount,
+        activeSessions: sessionCount,
+        monthlyRecurringRevenue: `$${revenue}K`,
+      },
+      userGrowth: userGrowthData,
+      sessionActivity: sessionData,
+      revenueData: revenueData,
+      platformDistribution: platformDistribution,
+      systemHealth: systemHealth,
+      topOrganizations: topOrganizations,
+    };
+
+    const dataStr = JSON.stringify(reportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `super-admin-report-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   // Simulate real-time updates
   useEffect(() => {
@@ -171,7 +207,7 @@ export function SuperAdminDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleExportReport}>
                 <Download className="w-4 h-4 mr-2" />
                 Export Report
               </Button>

@@ -3,7 +3,7 @@
  * Detailed view of individual safety events
  */
 
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router';
 import { AdminLayoutNew } from '@/app/components/AdminLayoutNew';
 import { Card } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';

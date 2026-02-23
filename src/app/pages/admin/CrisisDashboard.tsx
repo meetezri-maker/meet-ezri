@@ -1,10 +1,6 @@
-import { useState } from "react";
-import { motion } from "motion/react";
-import { AdminLayoutNew } from "../../components/AdminLayoutNew";
-import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { AlertTriangle, Phone, Mail, Eye, CheckCircle, Clock, TrendingDown, Shield, MessageSquare, User, Bell, ArrowRight, AlertCircle, Activity, Users, Calendar, Filter, Download } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 interface CrisisEvent {
   id: number;

@@ -15,7 +15,7 @@ import {
   Eye,
   EyeOff
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useState } from "react";
 import { AppLayout } from "@/app/components/AppLayout";
 

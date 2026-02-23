@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { Shield, Camera, Clock, AlertTriangle, Key, CheckCircle } from "lucide-react";
 import { useState } from "react";
 import { LowMinutesWarning } from "../components/modals/LowMinutesWarning";

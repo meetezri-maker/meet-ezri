@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { AppLayout } from '@/app/components/AppLayout';
 import { Users, MessageCircle, Heart, Share2, Plus, TrendingUp, Clock, Eye, ThumbsUp, MessageSquare, Search, Filter, Globe, Lock, ArrowLeft } from 'lucide-react';
 import { AnimatedCard } from '@/app/components/AnimatedCard';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 interface Post {
   id: string;

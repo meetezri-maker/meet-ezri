@@ -1,12 +1,12 @@
 import { motion, AnimatePresence } from "motion/react";
-import { Clock, AlertTriangle, Zap, CreditCard, X, TrendingUp } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Clock, AlertTriangle, Zap, X, TrendingUp, Package, Crown } from "lucide-react";
+import { Link } from "react-router";
 
 interface LowMinutesWarningProps {
   isOpen: boolean;
   onClose: () => void;
   minutesRemaining: number;
+  currentPlan?: 'free' | 'core' | 'pro';
   onUpgrade?: () => void;
 }
 
@@ -14,6 +14,7 @@ export function LowMinutesWarning({
   isOpen, 
   onClose, 
   minutesRemaining,
+  currentPlan = 'free',
   onUpgrade 
 }: LowMinutesWarningProps) {
   const [timeLeft, setTimeLeft] = useState(minutesRemaining);
@@ -24,8 +25,9 @@ export function LowMinutesWarning({
 
   const getUrgencyLevel = () => {
     if (minutesRemaining <= 1) return "critical";
-    if (minutesRemaining <= 3) return "high";
-    return "medium";
+    if (minutesRemaining <= 5) return "high";
+    if (minutesRemaining <= 10) return "medium";
+    return "low";
   };
 
   const urgency = getUrgencyLevel();
@@ -54,10 +56,44 @@ export function LowMinutesWarning({
       text: "text-yellow-900",
       subtext: "text-yellow-700",
       icon: "text-yellow-600"
+    },
+    low: {
+      gradient: "from-blue-500 to-cyan-600",
+      bg: "from-blue-50 to-cyan-50",
+      border: "border-blue-200",
+      text: "text-blue-900",
+      subtext: "text-blue-700",
+      icon: "text-blue-600"
     }
   };
 
   const config = urgencyConfig[urgency];
+
+  // Upgrade options based on current plan
+  const upgradeOptions = {
+    free: {
+      title: "Upgrade to Core or Pro",
+      options: [
+        { name: "Core (Habit Plan)", price: "$25/mo", minutes: "200 Minutes (3.33 Hours)", icon: Package },
+        { name: "Pro (Clarity)", price: "$49/mo", minutes: "400 Minutes (6.66 Hours)", icon: Crown }
+      ]
+    },
+    core: {
+      title: "Upgrade to Pro or Add Minutes",
+      options: [
+        { name: "Pro (Clarity)", price: "$49/mo", minutes: "400 Minutes (6.66 Hours)", icon: Crown },
+        { name: "Pay-As-You-Go", price: "$5", minutes: "25 Minutes (~0.42 Hour)", icon: Zap }
+      ]
+    },
+    pro: {
+      title: "Add More Minutes",
+      options: [
+        { name: "Pay-As-You-Go", price: "$5", minutes: "25 Minutes (~0.42 Hour)", icon: Zap }
+      ]
+    }
+  };
+
+  const currentUpgrade = upgradeOptions[currentPlan];
 
   return (
     <AnimatePresence>
@@ -78,7 +114,7 @@ export function LowMinutesWarning({
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-white rounded-3xl shadow-2xl max-w-md w-full pointer-events-auto overflow-hidden"
+              className="bg-white rounded-3xl shadow-2xl max-w-lg w-full pointer-events-auto overflow-hidden max-h-[90vh] overflow-y-auto"
             >
               {/* Close Button */}
               <button
@@ -137,7 +173,7 @@ export function LowMinutesWarning({
                 >
                   <div className="text-center">
                     <p className="text-sm text-gray-600 mb-2">Time Remaining</p>
-                    <div className="flex items-center justify-center gap-2 mb-3">
+                    <div className="flex items-center justify-center gap-2 mb-2">
                       <motion.div
                         animate={{ scale: [1, 1.1, 1] }}
                         transition={{ duration: 1.5, repeat: Infinity }}
@@ -147,14 +183,17 @@ export function LowMinutesWarning({
                       </motion.div>
                       <span className="text-2xl font-medium text-gray-500">min</span>
                     </div>
+                    <p className="text-xs text-gray-500">
+                      ({(timeLeft / 60).toFixed(2)} Hours)
+                    </p>
                     
                     {/* Progress Bar */}
-                    <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden mt-3">
                       <motion.div
-                        initial={{ width: `${(timeLeft / 5) * 100}%` }}
+                        initial={{ width: `${Math.min((timeLeft / 30) * 100, 100)}%` }}
                         animate={{ 
-                          width: `${(timeLeft / 5) * 100}%`,
-                          backgroundColor: urgency === "critical" ? "#ef4444" : urgency === "high" ? "#f97316" : "#eab308"
+                          width: `${Math.min((timeLeft / 30) * 100, 100)}%`,
+                          backgroundColor: urgency === "critical" ? "#ef4444" : urgency === "high" ? "#f97316" : urgency === "medium" ? "#eab308" : "#3b82f6"
                         }}
                         className="h-full rounded-full"
                         transition={{ duration: 0.5 }}
@@ -168,55 +207,51 @@ export function LowMinutesWarning({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="mb-6"
+                  className="mb-6 text-center"
                 >
-                  <p className="text-sm text-gray-700 text-center mb-4">
+                  <p className="text-sm text-gray-700">
                     {urgency === "critical" 
-                      ? "Your session will end in less than a minute. Upgrade now to continue your conversation with Ezri." 
-                      : "You're running low on minutes. Consider upgrading to ensure uninterrupted sessions."}
+                      ? "Your session will end in less than a minute. Upgrade or add minutes to continue." 
+                      : "Consider upgrading your plan or adding minutes to ensure uninterrupted sessions with Ezri."}
                   </p>
-
-                  {/* Quick Stats */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-blue-50 rounded-xl p-3 text-center">
-                      <p className="text-xs text-blue-600 mb-1">This Session</p>
-                      <p className="text-lg font-bold text-blue-900">
-                        {Math.max(0, 5 - timeLeft)} min
-                      </p>
-                    </div>
-                    <div className="bg-purple-50 rounded-xl p-3 text-center">
-                      <p className="text-xs text-purple-600 mb-1">After This</p>
-                      <p className="text-lg font-bold text-purple-900">
-                        {Math.max(0, timeLeft - (5 - timeLeft))} min
-                      </p>
-                    </div>
-                  </div>
                 </motion.div>
 
-                {/* Upgrade Benefits */}
+                {/* Upgrade Options */}
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-4 mb-6"
+                  className="mb-6"
                 >
-                  <h3 className="font-bold text-blue-900 mb-3 flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-blue-600" />
-                    Upgrade for More Time
+                  <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2 justify-center">
+                    <TrendingUp className="w-5 h-5 text-primary" />
+                    {currentUpgrade.title}
                   </h3>
-                  <div className="space-y-2 text-sm text-blue-700">
-                    <div className="flex items-start gap-2">
-                      <span className="text-blue-500">✓</span>
-                      <p>Unlimited session time with Ezri</p>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-blue-500">✓</span>
-                      <p>Access to advanced wellness tools</p>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-blue-500">✓</span>
-                      <p>Priority support and features</p>
-                    </div>
+                  <div className="space-y-3">
+                    {currentUpgrade.options.map((option, index) => {
+                      const Icon = option.icon;
+                      return (
+                        <div key={index} className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                                <Icon className="w-5 h-5 text-white" />
+                              </div>
+                              <div>
+                                <p className="font-bold text-blue-900">{option.name}</p>
+                                <p className="text-xs text-blue-700">{option.minutes}</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-blue-900">{option.price}</p>
+                              {option.name !== "Pay-As-You-Go" && (
+                                <p className="text-xs text-blue-600">per month</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </motion.div>
 
@@ -227,14 +262,14 @@ export function LowMinutesWarning({
                   transition={{ delay: 0.4 }}
                   className="space-y-3"
                 >
-                  <Link to="/app/settings/account?tab=plan" onClick={onClose}>
+                  <Link to="/app/billing" onClick={onClose}>
                     <motion.button
                       whileHover={{ scale: 1.02, y: -2 }}
                       whileTap={{ scale: 0.98 }}
                       className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-gradient-to-r ${config.gradient} text-white font-bold shadow-lg hover:shadow-xl transition-all`}
                     >
                       <TrendingUp className="w-5 h-5" />
-                      Upgrade Now
+                      View Plans & Upgrade
                     </motion.button>
                   </Link>
 
@@ -256,7 +291,8 @@ export function LowMinutesWarning({
                   className="mt-4 text-center"
                 >
                   <p className="text-xs text-gray-500">
-                    Your session will automatically end when time runs out
+                    Your session will automatically end when minutes run out.
+                    {currentPlan === 'free' && " Upgrade for continuity and full features."}
                   </p>
                 </motion.div>
               </div>

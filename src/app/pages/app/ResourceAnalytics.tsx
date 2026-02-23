@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { AppLayout } from '@/app/components/AppLayout';
 import { Card } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';

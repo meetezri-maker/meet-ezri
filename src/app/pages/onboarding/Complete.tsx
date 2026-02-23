@@ -1,7 +1,6 @@
-import { OnboardingLayout } from "../../components/OnboardingLayout";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { motion } from "motion/react";
 import { Heart, Sparkles, Video, MessageSquare, TrendingUp, ArrowRight } from "lucide-react";
 import { FloatingElement } from "../../components/FloatingElement";

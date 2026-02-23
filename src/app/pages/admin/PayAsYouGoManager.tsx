@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { motion } from "motion/react";
 import { 
   DollarSign, 
@@ -27,7 +27,7 @@ const MOCK_PAYG_TRANSACTIONS: PayAsYouGoPurchase[] = [
   {
     id: "payg-001",
     userId: "user-123",
-    planId: "basic",
+    planId: "core",
     minutesPurchased: 100,
     ratePerMinute: 0.25,
     totalCost: 25.00,
@@ -49,7 +49,7 @@ const MOCK_PAYG_TRANSACTIONS: PayAsYouGoPurchase[] = [
   {
     id: "payg-003",
     userId: "user-789",
-    planId: "basic",
+    planId: "core",
     minutesPurchased: 50,
     ratePerMinute: 0.25,
     totalCost: 12.50,
@@ -60,7 +60,7 @@ const MOCK_PAYG_TRANSACTIONS: PayAsYouGoPurchase[] = [
   {
     id: "payg-004",
     userId: "user-234",
-    planId: "enterprise",
+    planId: "pro",
     minutesPurchased: 300,
     ratePerMinute: 0.10,
     totalCost: 30.00,
@@ -82,7 +82,7 @@ const MOCK_PAYG_TRANSACTIONS: PayAsYouGoPurchase[] = [
   {
     id: "payg-006",
     userId: "user-890",
-    planId: "basic",
+    planId: "core",
     minutesPurchased: 75,
     ratePerMinute: 0.25,
     totalCost: 18.75,
@@ -104,7 +104,7 @@ const MOCK_PAYG_TRANSACTIONS: PayAsYouGoPurchase[] = [
   {
     id: "payg-008",
     userId: "user-678",
-    planId: "enterprise",
+    planId: "pro",
     minutesPurchased: 500,
     ratePerMinute: 0.10,
     totalCost: 50.00,
@@ -115,7 +115,7 @@ const MOCK_PAYG_TRANSACTIONS: PayAsYouGoPurchase[] = [
   {
     id: "payg-009",
     userId: "user-901",
-    planId: "basic",
+    planId: "core",
     minutesPurchased: 60,
     ratePerMinute: 0.25,
     totalCost: 15.00,
@@ -231,15 +231,16 @@ export function PayAsYouGoManager() {
   const planBreakdown = useMemo(() => {
     const breakdown: Record<PlanTier, { count: number; revenue: number; minutes: number }> = {
       free: { count: 0, revenue: 0, minutes: 0 },
-      basic: { count: 0, revenue: 0, minutes: 0 },
-      pro: { count: 0, revenue: 0, minutes: 0 },
-      enterprise: { count: 0, revenue: 0, minutes: 0 }
+      core: { count: 0, revenue: 0, minutes: 0 },
+      pro: { count: 0, revenue: 0, minutes: 0 }
     };
 
     filteredTransactions.forEach(t => {
-      breakdown[t.planId].count++;
-      breakdown[t.planId].revenue += t.totalCost;
-      breakdown[t.planId].minutes += t.minutesPurchased;
+      if (breakdown[t.planId]) {
+        breakdown[t.planId].count++;
+        breakdown[t.planId].revenue += t.totalCost;
+        breakdown[t.planId].minutes += t.minutesPurchased;
+      }
     });
 
     return breakdown;
@@ -376,7 +377,7 @@ export function PayAsYouGoManager() {
             Revenue by Plan Tier
           </h3>
           <div className="grid md:grid-cols-3 gap-6">
-            {(["basic", "pro", "enterprise"] as PlanTier[]).map(planId => {
+            {(["core", "pro"] as PlanTier[]).map(planId => {
               const plan = SUBSCRIPTION_PLANS[planId];
               const data = planBreakdown[planId];
               const percentage = stats.totalRevenue > 0 
@@ -524,9 +525,8 @@ export function PayAsYouGoManager() {
                 className="px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-background"
               >
                 <option value="all">All Plans</option>
-                <option value="basic">Basic</option>
+                <option value="core">Core</option>
                 <option value="pro">Pro</option>
-                <option value="enterprise">Enterprise</option>
               </select>
             </div>
           </div>

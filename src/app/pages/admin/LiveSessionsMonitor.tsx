@@ -33,7 +33,7 @@ import {
   UserX,
   FileText,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 interface LiveSession {
   id: string;

@@ -26,7 +26,7 @@ import {
   Trash2,
   UserCheck,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 
 interface User {
   id: number;

@@ -1,30 +1,6 @@
-import { AppLayout } from "../../components/AppLayout";
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
 import { Label } from "../../components/ui/label";
 import { motion } from "motion/react";
-import { Link, useNavigate } from "react-router-dom";
-import {
-  User,
-  Mail,
-  Phone,
-  Calendar,
-  MapPin,
-  Edit,
-  Camera,
-  Bell,
-  Lock,
-  Shield,
-  Heart,
-  Volume2,
-  Palette,
-  LogOut,
-  ChevronRight,
-  Trash2,
-  AlertTriangle,
-  X
-} from "lucide-react";
-import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router";
 
 export function UserProfile() {
   const navigate = useNavigate();

@@ -27,7 +27,7 @@ import {
 import { useState } from "react";
 import { Card } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { AnimatePresence } from "motion/react";
 
 interface ContentItem {

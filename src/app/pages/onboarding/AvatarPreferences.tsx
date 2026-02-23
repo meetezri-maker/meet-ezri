@@ -1,11 +1,6 @@
-import { OnboardingLayout } from "../../components/OnboardingLayout";
-import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { Label } from "../../components/ui/label";
-import { Link } from "react-router-dom";
-import { motion } from "motion/react";
-import { ArrowRight, ArrowLeft, Sparkles, Volume2, Palette, Heart, Brain, Users, Star, CheckCircle } from "lucide-react";
-import { useState } from "react";
+import { Link } from "react-router";
 
 interface AIAvatar {
   id: string;

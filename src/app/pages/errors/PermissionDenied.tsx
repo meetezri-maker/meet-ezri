@@ -1,7 +1,6 @@
 import { motion } from "motion/react";
 import { ShieldOff, Camera, Mic, MapPin, Settings, RefreshCw, Home, AlertTriangle } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { Link } from "react-router";
 
 interface PermissionDeniedProps {
   type?: "camera" | "microphone" | "location" | "all";

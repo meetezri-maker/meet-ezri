@@ -1,7 +1,6 @@
 import { motion } from "motion/react";
 import { Clock, TrendingUp, Zap, Check, Star, ArrowRight, Home, Shield } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { Link } from "react-router";
 
 export function TrialExpired() {
   const [selectedPlan, setSelectedPlan] = useState<"basic" | "premium" | "elite">("premium");

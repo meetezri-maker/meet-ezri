@@ -28,7 +28,7 @@ import {
   History,
   Wind
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import { useState } from "react";
 import { AppLayout } from "@/app/components/AppLayout";
 

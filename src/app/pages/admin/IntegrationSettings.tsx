@@ -56,6 +56,13 @@ export function IntegrationSettings() {
   const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null);
   const [showAddApiKey, setShowAddApiKey] = useState(false);
   const [showEditApiKey, setShowEditApiKey] = useState(false);
+  const [showApiKeys, setShowApiKeys] = useState<{ [key: string]: boolean }>({});
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showAddWebhookModal, setShowAddWebhookModal] = useState(false);
+  const [showEditWebhookModal, setShowEditWebhookModal] = useState(false);
+  const [showDeleteWebhookModal, setShowDeleteWebhookModal] = useState(false);
+  const [selectedWebhook, setSelectedWebhook] = useState<Webhook | null>(null);
 
   const [integrations, setIntegrations] = useState<Integration[]>([
     {

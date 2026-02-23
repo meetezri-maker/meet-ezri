@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { AppLayout } from '@/app/components/AppLayout';
 import { BookOpen, Video, Headphones, FileText, Search, Filter, Star, Clock, Play, Download, Bookmark, Heart, TrendingUp, Award, ArrowLeft } from 'lucide-react';
 import { AnimatedCard } from '@/app/components/AnimatedCard';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 interface Resource {
   id: string;

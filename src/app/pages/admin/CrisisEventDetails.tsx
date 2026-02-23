@@ -28,7 +28,7 @@ import {
   Ban,
   X,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 export function CrisisEventDetails() {
   const [selectedAction, setSelectedAction] = useState<string | null>(null);

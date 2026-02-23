@@ -4,7 +4,7 @@ import { AdminLayoutNew } from "../../components/AdminLayoutNew";
 import { Card } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { ArrowLeft, Mail, Phone, Calendar, Activity, MessageSquare, Heart, AlertTriangle, Ban, CheckCircle2, Clock, MapPin, Shield, Star, TrendingUp, TrendingDown, Edit, Trash2, Key, Send, Download, Eye, EyeOff, User, CreditCard, Bell, Settings } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 export function UserDetailsEnhanced() {
   const [showActionMenu, setShowActionMenu] = useState(false);

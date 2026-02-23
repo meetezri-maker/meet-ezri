@@ -1,7 +1,6 @@
 import { motion } from "motion/react";
 import { Camera, Mic, VideoOff, MicOff, AlertCircle, RefreshCw, Home, HelpCircle, ExternalLink } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Link } from "react-router";
 
 interface NoDeviceAccessProps {
   type?: "camera" | "microphone" | "both";

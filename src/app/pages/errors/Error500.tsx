@@ -1,7 +1,6 @@
 import { motion } from "motion/react";
 import { Home, RefreshCw, AlertTriangle, Mail } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { Link } from "react-router";
 
 export function Error500() {
   const [isRefreshing, setIsRefreshing] = useState(false);

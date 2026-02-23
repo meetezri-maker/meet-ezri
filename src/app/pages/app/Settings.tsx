@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { Card } from "../../components/ui/card";
 import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 export function Settings() {
   return (

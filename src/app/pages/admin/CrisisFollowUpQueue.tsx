@@ -25,7 +25,7 @@ import {
   FileText,
   MapPin,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { Input } from "../../components/ui/input";
 
 interface FollowUp {

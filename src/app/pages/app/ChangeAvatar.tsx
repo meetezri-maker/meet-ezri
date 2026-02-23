@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { AppLayout } from '@/app/components/AppLayout';
 import { Brain, CheckCircle, Star, Users, Volume2, Heart, ArrowLeft, RefreshCw, AlertCircle } from 'lucide-react';
 import { AnimatedCard } from '@/app/components/AnimatedCard';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 interface AIAvatar {
   id: string;

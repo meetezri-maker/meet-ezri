@@ -1,7 +1,6 @@
 import { motion } from "motion/react";
 import { WifiOff, RefreshCw, Smartphone, Home } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Link } from "react-router";
 
 export function Offline() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);

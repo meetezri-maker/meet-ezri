@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { motion } from "motion/react";
 import { 
   Package, 
@@ -37,9 +37,8 @@ export function PackageManager() {
 
   const planStats: Record<PlanTier, { users: number; revenue: number }> = {
     free: { users: 4523, revenue: 0 },
-    basic: { users: 5234, revenue: 130850 },
-    pro: { users: 2486, revenue: 146694 },
-    enterprise: { users: 300, revenue: 44700 }
+    core: { users: 5234, revenue: 130850 },
+    pro: { users: 2786, revenue: 191394 }
   };
 
   const handleEdit = (planId: PlanTier) => {
@@ -154,7 +153,7 @@ export function PackageManager() {
                   <div className="flex items-center gap-3">
                     <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center`}>
                       {planId === 'free' && <Sparkles className="w-6 h-6 text-white" />}
-                      {planId === 'basic' && <Package className="w-6 h-6 text-white" />}
+                      {planId === 'core' && <Package className="w-6 h-6 text-white" />}
                       {planId === 'pro' && <Zap className="w-6 h-6 text-white" />}
                       {planId === 'enterprise' && <Crown className="w-6 h-6 text-white" />}
                     </div>

@@ -15,7 +15,7 @@ import {
   Bell,
   Heart
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useState } from "react";
 import { useSafetyConsent } from "@/app/contexts/SafetyContext";
 import { AppLayout } from "@/app/components/AppLayout";
