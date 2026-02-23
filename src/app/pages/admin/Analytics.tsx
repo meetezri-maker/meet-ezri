@@ -19,7 +19,6 @@ import { useState } from "react";
 export function Analytics() {
   const [timeRange, setTimeRange] = useState("30d");
 
-  // Mock data for charts
   const userGrowthData = [
     { date: "Week 1", users: 120, active: 98, premium: 12 },
     { date: "Week 2", users: 245, active: 189, premium: 28 },
@@ -67,6 +66,35 @@ export function Analytics() {
     { month: "Jun", revenue: 31200, recurring: 26800, oneTime: 4400 }
   ];
 
+  const getRangeFactor = () => {
+    if (timeRange === "7d") return 0.25;
+    if (timeRange === "30d") return 1;
+    if (timeRange === "90d") return 2.5;
+    return 4;
+  };
+
+  const rangeFactor = getRangeFactor();
+
+  const visibleUserGrowth = (() => {
+    if (timeRange === "7d") return userGrowthData.slice(-2);
+    if (timeRange === "30d") return userGrowthData.slice(-4);
+    if (timeRange === "90d") return userGrowthData;
+    return userGrowthData;
+  })();
+
+  const visibleSessionData = (() => {
+    if (timeRange === "7d") return sessionData.slice(0, 3);
+    if (timeRange === "30d") return sessionData.slice(0, 5);
+    return sessionData;
+  })();
+
+  const adjustedRevenueData = revenueData.map((item) => ({
+    ...item,
+    revenue: Math.round(item.revenue * rangeFactor),
+    recurring: Math.round(item.recurring * rangeFactor),
+    oneTime: Math.round(item.oneTime * rangeFactor),
+  }));
+
   const stats = [
     {
       label: "Total Revenue",
@@ -100,7 +128,13 @@ export function Analytics() {
       icon: Target,
       color: "from-orange-500 to-red-600"
     }
-  ];
+  ].map((stat) => ({
+    ...stat,
+    value:
+      stat.label === "Total Revenue"
+        ? `$${Math.round(127500 * rangeFactor).toLocaleString()}`
+        : stat.value,
+  }));
 
   return (
     <AdminLayoutNew>
@@ -187,7 +221,7 @@ export function Analytics() {
             <BarChart3 className="w-5 h-5 text-blue-500" />
           </div>
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={userGrowthData}>
+            <AreaChart data={visibleUserGrowth}>
               <defs>
                 <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
@@ -226,7 +260,7 @@ export function Analytics() {
           >
             <h2 className="text-xl font-bold text-gray-900 mb-6">Weekly Sessions</h2>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={sessionData}>
+              <BarChart data={visibleSessionData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="day" stroke="#6b7280" />
                 <YAxis stroke="#6b7280" />

@@ -454,7 +454,9 @@ export function DataRetentionPrivacy() {
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div>
                       <p className="font-medium">Allow User Data Export</p>
-                      <p className="text-sm text-muted-foreground">Users can request their data at any time</p>
+                      <p className="text-sm text-muted-foreground">
+                        Users can request a full export of their personal data at any time
+                      </p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" defaultChecked />
@@ -487,7 +489,9 @@ export function DataRetentionPrivacy() {
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div>
                       <p className="font-medium">Anonymous Usage Analytics</p>
-                      <p className="text-sm text-muted-foreground">Collect anonymized usage data for improvements</p>
+                      <p className="text-sm text-muted-foreground">
+                        Collect only aggregated, anonymized usage data to improve Ezri
+                      </p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" defaultChecked />

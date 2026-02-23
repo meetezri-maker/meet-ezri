@@ -42,7 +42,6 @@ import { Button } from "@/app/components/ui/button";
 export function EngagementMetrics() {
   const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("30d");
 
-  // Engagement Score Trend
   const engagementTrendData = [
     { date: "Week 1", score: 72, sessions: 2890, journalEntries: 456 },
     { date: "Week 2", score: 75, sessions: 3120, journalEntries: 523 },
@@ -54,7 +53,6 @@ export function EngagementMetrics() {
     { date: "Week 8", score: 89, sessions: 4420, journalEntries: 823 },
   ];
 
-  // Session Frequency Analysis
   const sessionFrequencyData = [
     { range: "1-2 times/week", users: 890, percentage: 18 },
     { range: "3-4 times/week", users: 1456, percentage: 29 },
@@ -62,7 +60,6 @@ export function EngagementMetrics() {
     { range: "Daily (7+)", users: 812, percentage: 16 },
   ];
 
-  // Feature Engagement
   const featureEngagementData = [
     { feature: "AI Sessions", usage: 95, satisfaction: 4.8 },
     { feature: "Mood Tracking", usage: 89, satisfaction: 4.6 },
@@ -72,7 +69,6 @@ export function EngagementMetrics() {
     { feature: "Community", usage: 42, satisfaction: 4.2 },
   ];
 
-  // User Journey Engagement
   const userJourneyData = [
     { stage: "Onboarding", completion: 92, dropoff: 8 },
     { stage: "First Session", completion: 87, dropoff: 5 },
@@ -83,7 +79,6 @@ export function EngagementMetrics() {
     { stage: "Month 3+", completion: 53, dropoff: 5 },
   ];
 
-  // Return Rate Data
   const returnRateData = [
     { day: "Day 1", rate: 95 },
     { day: "Day 2", rate: 88 },
@@ -95,13 +90,32 @@ export function EngagementMetrics() {
     { day: "Day 90", rate: 49 },
   ];
 
-  // Engagement by Time of Day
   const timeOfDayEngagement = [
     { time: "Morning (6-12)", engagement: 78, sessions: 1234 },
     { time: "Afternoon (12-6)", engagement: 85, sessions: 1890 },
     { time: "Evening (6-10)", engagement: 92, sessions: 2456 },
     { time: "Night (10-6)", engagement: 62, sessions: 567 },
   ];
+
+  const getRangeFactor = () => {
+    if (timeRange === "7d") return 0.4;
+    if (timeRange === "30d") return 1;
+    return 2;
+  };
+
+  const rangeFactor = getRangeFactor();
+
+  const visibleEngagementTrend = (() => {
+    if (timeRange === "7d") return engagementTrendData.slice(-2);
+    if (timeRange === "30d") return engagementTrendData.slice(-4);
+    return engagementTrendData;
+  })();
+
+  const visibleReturnRate = (() => {
+    if (timeRange === "7d") return returnRateData.slice(0, 4);
+    if (timeRange === "30d") return returnRateData.slice(0, 6);
+    return returnRateData;
+  })();
 
   const stats = [
     {
@@ -140,7 +154,13 @@ export function EngagementMetrics() {
       color: "from-orange-500 to-red-600",
       description: "users returning",
     },
-  ];
+  ].map((stat) => ({
+    ...stat,
+    value:
+      stat.label === "Overall Engagement Score"
+        ? `${Math.min(100, Math.round(89 * rangeFactor))}%`
+        : stat.value,
+  }));
 
   return (
     <AdminLayoutNew>
@@ -251,7 +271,7 @@ export function EngagementMetrics() {
             </div>
 
             <ResponsiveContainer width="100%" height={350}>
-              <ComposedChart data={engagementTrendData}>
+              <ComposedChart data={visibleEngagementTrend}>
                 <defs>
                   <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#ec4899" stopOpacity={0.8} />
@@ -457,8 +477,8 @@ export function EngagementMetrics() {
                 <Users className="w-5 h-5 text-green-400" />
               </div>
 
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={returnRateData}>
+            <ResponsiveContainer width="100%" height={280}>
+              <LineChart data={visibleReturnRate}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                   <XAxis dataKey="day" stroke="#9ca3af" />
                   <YAxis stroke="#9ca3af" />

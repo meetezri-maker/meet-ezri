@@ -40,7 +40,6 @@ import { Button } from "@/app/components/ui/button";
 export function ContentPerformance() {
   const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("30d");
 
-  // Content Performance Overview
   const performanceData = [
     { date: "Week 1", views: 12450, likes: 890, shares: 145, completions: 78 },
     { date: "Week 2", views: 15230, likes: 1120, shares: 189, completions: 82 },
@@ -48,7 +47,6 @@ export function ContentPerformance() {
     { date: "Week 4", views: 21340, likes: 1680, shares: 289, completions: 88 },
   ];
 
-  // Top Performing Content
   const topContent = [
     {
       id: "1",
@@ -102,7 +100,6 @@ export function ContentPerformance() {
     },
   ];
 
-  // Content by Type Distribution
   const contentTypeData = [
     { name: "Articles", value: 35, count: 28, color: "#3b82f6" },
     { name: "Tips", value: 30, count: 42, color: "#f59e0b" },
@@ -110,7 +107,6 @@ export function ContentPerformance() {
     { name: "Videos", value: 10, count: 8, color: "#ec4899" },
   ];
 
-  // Engagement by Category
   const categoryEngagement = [
     { category: "Mental Wellness", engagement: 94, views: 18900 },
     { category: "Physical Wellness", engagement: 87, views: 15600 },
@@ -120,7 +116,6 @@ export function ContentPerformance() {
     { category: "Mindfulness", engagement: 82, views: 9800 },
   ];
 
-  // Completion Rates
   const completionRates = [
     { type: "Articles", started: 5420, completed: 4756, rate: 88 },
     { type: "Videos", started: 3210, completed: 2889, rate: 90 },
@@ -128,13 +123,26 @@ export function ContentPerformance() {
     { type: "Tips", started: 8900, completed: 8188, rate: 92 },
   ];
 
-  // Trending Content
   const trendingData = [
     { week: "Week 1", trending: 12, views: 8900 },
     { week: "Week 2", trending: 18, views: 12400 },
     { week: "Week 3", trending: 24, views: 15800 },
     { week: "Week 4", trending: 32, views: 19200 },
   ];
+
+  const getRangeFactor = () => {
+    if (timeRange === "7d") return 0.5;
+    if (timeRange === "30d") return 1;
+    return 2;
+  };
+
+  const rangeFactor = getRangeFactor();
+
+  const visiblePerformanceData = (() => {
+    if (timeRange === "7d") return performanceData.slice(-2);
+    if (timeRange === "30d") return performanceData.slice(-3);
+    return performanceData;
+  })();
 
   const stats = [
     {
@@ -169,7 +177,15 @@ export function ContentPerformance() {
       icon: Award,
       color: "from-orange-500 to-amber-600",
     },
-  ];
+  ].map((stat) => ({
+    ...stat,
+    value:
+      stat.label === "Total Views"
+        ? `${Math.round(67920 * rangeFactor).toLocaleString()}`
+        : stat.label === "Avg Completion"
+        ? `${Math.min(100, Math.round(87.5 * rangeFactor))}%`
+        : stat.value,
+  }));
 
   return (
     <AdminLayoutNew>
@@ -281,7 +297,7 @@ export function ContentPerformance() {
             </div>
 
             <ResponsiveContainer width="100%" height={350}>
-              <AreaChart data={performanceData}>
+              <AreaChart data={visiblePerformanceData}>
                 <defs>
                   <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />

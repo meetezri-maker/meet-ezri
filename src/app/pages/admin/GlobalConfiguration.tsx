@@ -578,7 +578,7 @@ export function GlobalConfiguration() {
                     className="border-white text-white hover:bg-white/20"
                     size="sm"
                   >
-                    Discard
+                    Reset
                   </Button>
                   <Button
                     onClick={handleSave}

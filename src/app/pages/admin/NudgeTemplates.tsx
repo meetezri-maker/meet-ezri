@@ -53,8 +53,8 @@ export function NudgeTemplates() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
-  
-  // Modal states
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
   const [viewModalTemplate, setViewModalTemplate] = useState<NudgeTemplate | null>(null);
   const [editModalTemplate, setEditModalTemplate] = useState<NudgeTemplate | null>(null);
   const [deleteModalTemplate, setDeleteModalTemplate] = useState<NudgeTemplate | null>(null);
@@ -271,7 +271,10 @@ export function NudgeTemplates() {
               <Filter className="w-4 h-4 mr-2" />
               Import
             </Button>
-            <Button className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white">
+            <Button
+              className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white"
+              onClick={() => setShowCreateModal(true)}
+            >
               <Plus className="w-4 h-4 mr-2" />
               Create Template
             </Button>
@@ -531,13 +534,117 @@ export function NudgeTemplates() {
               <p className="text-gray-600 mb-6">
                 Try adjusting your filters or create a new template
               </p>
-              <Button className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white">
+              <Button
+                className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white"
+                onClick={() => setShowCreateModal(true)}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Template
               </Button>
             </Card>
           </motion.div>
         )}
+
+        {/* Create Modal */}
+        <AnimatePresence>
+          {showCreateModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+              onClick={() => setShowCreateModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold">Create New Template</h2>
+                  <Button variant="ghost" size="sm" onClick={() => setShowCreateModal(false)}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Template Name</label>
+                    <Input placeholder="Daily Check-in Reminder" />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Category</label>
+                      <select className="w-full px-3 py-2 border rounded-lg">
+                        <option value="Engagement">Engagement</option>
+                        <option value="Wellness">Wellness</option>
+                        <option value="Progress">Progress</option>
+                        <option value="Achievement">Achievement</option>
+                        <option value="Retention">Retention</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Type</label>
+                      <select className="w-full px-3 py-2 border rounded-lg">
+                        <option value="push">Push Notification</option>
+                        <option value="email">Email</option>
+                        <option value="in-app">In-App</option>
+                        <option value="sms">SMS</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Title</label>
+                    <Input placeholder="How are you feeling today?" />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Message</label>
+                    <textarea
+                      className="w-full p-3 border rounded-lg"
+                      rows={4}
+                      placeholder="Hi {{name}}, take a moment to check in with yourself."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Variables (comma separated)</label>
+                    <Input placeholder="name, sessions, time, etc." />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Status</label>
+                    <select className="w-full px-3 py-2 border rounded-lg" defaultValue="draft">
+                      <option value="active">Active</option>
+                      <option value="draft">Draft</option>
+                      <option value="archived">Archived</option>
+                    </select>
+                  </div>
+
+                  <div className="flex gap-2 pt-4">
+                    <Button variant="outline" className="flex-1" onClick={() => setShowCreateModal(false)}>
+                      Cancel
+                    </Button>
+                    <Button
+                      className="flex-1"
+                      onClick={() => {
+                        alert("Created new template");
+                        setShowCreateModal(false);
+                      }}
+                    >
+                      <Save className="w-4 h-4 mr-2" />
+                      Create Template
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* View Modal */}
         <AnimatePresence>

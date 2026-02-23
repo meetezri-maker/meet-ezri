@@ -31,6 +31,7 @@ export function CrisisDashboard() {
   const [contactNotes, setContactNotes] = useState("");
   const [statusNotes, setStatusNotes] = useState("");
   const [newStatus, setNewStatus] = useState<"contacted" | "in-progress" | "resolved">("contacted");
+  const [contactMethod, setContactMethod] = useState<"phone" | "email" | "in_app">("phone");
 
   const crisisEvents: CrisisEvent[] = [
     {
@@ -651,18 +652,66 @@ export function CrisisDashboard() {
             <div className="mb-6">
               <label className="block text-sm font-semibold text-gray-700 mb-3">Contact Method</label>
               <div className="grid grid-cols-3 gap-3">
-                <button className="p-4 border-2 border-blue-500 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors">
-                  <Phone className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-                  <p className="text-sm font-medium text-blue-900">Phone Call</p>
-                  <p className="text-xs text-blue-600 mt-1">Immediate</p>
+                <button
+                  type="button"
+                  onClick={() => setContactMethod("phone")}
+                  className={`p-4 border-2 rounded-xl transition-colors ${
+                    contactMethod === "phone"
+                      ? "border-blue-600 bg-blue-50"
+                      : "border-gray-300 bg-white hover:bg-gray-50"
+                  }`}
+                >
+                  <Phone
+                    className={`w-6 h-6 mx-auto mb-2 ${
+                      contactMethod === "phone" ? "text-blue-700" : "text-blue-600"
+                    }`}
+                  />
+                  <p
+                    className={`text-sm font-medium ${
+                      contactMethod === "phone" ? "text-blue-900" : "text-gray-900"
+                    }`}
+                  >
+                    Phone Call
+                  </p>
+                  <p
+                    className={`text-xs mt-1 ${
+                      contactMethod === "phone" ? "text-blue-700" : "text-blue-600"
+                    }`}
+                  >
+                    Immediate
+                  </p>
                 </button>
-                <button className="p-4 border-2 border-gray-300 bg-white rounded-xl hover:bg-gray-50 transition-colors">
-                  <Mail className="w-6 h-6 text-gray-600 mx-auto mb-2" />
+                <button
+                  type="button"
+                  onClick={() => setContactMethod("email")}
+                  className={`p-4 border-2 rounded-xl transition-colors ${
+                    contactMethod === "email"
+                      ? "border-gray-700 bg-gray-50"
+                      : "border-gray-300 bg-white hover:bg-gray-50"
+                  }`}
+                >
+                  <Mail
+                    className={`w-6 h-6 mx-auto mb-2 ${
+                      contactMethod === "email" ? "text-gray-900" : "text-gray-600"
+                    }`}
+                  />
                   <p className="text-sm font-medium text-gray-900">Email</p>
                   <p className="text-xs text-gray-500 mt-1">Follow-up</p>
                 </button>
-                <button className="p-4 border-2 border-gray-300 bg-white rounded-xl hover:bg-gray-50 transition-colors">
-                  <MessageSquare className="w-6 h-6 text-gray-600 mx-auto mb-2" />
+                <button
+                  type="button"
+                  onClick={() => setContactMethod("in_app")}
+                  className={`p-4 border-2 rounded-xl transition-colors ${
+                    contactMethod === "in_app"
+                      ? "border-purple-600 bg-purple-50"
+                      : "border-gray-300 bg-white hover:bg-gray-50"
+                  }`}
+                >
+                  <MessageSquare
+                    className={`w-6 h-6 mx-auto mb-2 ${
+                      contactMethod === "in_app" ? "text-purple-700" : "text-gray-600"
+                    }`}
+                  />
                   <p className="text-sm font-medium text-gray-900">In-App</p>
                   <p className="text-xs text-gray-500 mt-1">Message</p>
                 </button>
@@ -711,8 +760,11 @@ export function CrisisDashboard() {
               <Button
                 className="flex-1 bg-red-600 hover:bg-red-700 gap-2"
                 onClick={() => {
-                  // Handle contact submission
-                  console.log('Contact initiated:', selectedEvent.id, contactNotes);
+                  console.log("Contact initiated:", {
+                    eventId: selectedEvent.id,
+                    method: contactMethod,
+                    notes: contactNotes,
+                  });
                   setShowContactModal(false);
                   setContactNotes("");
                 }}

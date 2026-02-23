@@ -247,8 +247,63 @@ export function PayAsYouGoManager() {
   }, [filteredTransactions]);
 
   const handleExport = () => {
-    // In real app: generate CSV export
-    alert("Exporting PAYG transactions to CSV...");
+    const headers = [
+      "Transaction ID",
+      "User ID",
+      "Customer Name",
+      "Customer Email",
+      "Plan",
+      "Minutes",
+      "Rate Per Minute",
+      "Total Cost",
+      "Payment Method",
+      "Purchase Date",
+      "Status",
+    ];
+
+    const rows = filteredTransactions.map((t) => {
+      const user = MOCK_USERS[t.userId];
+      const date = new Date(t.purchaseDate);
+
+      return [
+        t.id,
+        t.userId,
+        user?.name || "Unknown",
+        user?.email || "",
+        t.planId,
+        t.minutesPurchased,
+        t.ratePerMinute.toFixed(2),
+        t.totalCost.toFixed(2),
+        t.paymentMethod,
+        date.toISOString(),
+        t.status,
+      ];
+    });
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) =>
+        row
+          .map((value) => {
+            const stringValue = String(value);
+            if (stringValue.includes(",") || stringValue.includes('"')) {
+              return `"${stringValue.replace(/"/g, '""')}"`;
+            }
+            return stringValue;
+          })
+          .join(",")
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `payg-transactions-${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   };
 
   return (

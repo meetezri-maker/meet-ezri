@@ -46,6 +46,41 @@ interface Transaction {
   invoice: string;
 }
 
+const INITIAL_TRANSACTIONS: Transaction[] = [
+  {
+    id: 1,
+    date: "Dec 28, 2024",
+    organization: "Healthcare Corp",
+    amount: 2499,
+    status: "paid",
+    invoice: "INV-2024-1234",
+  },
+  {
+    id: 2,
+    date: "Dec 27, 2024",
+    organization: "Wellness Clinic",
+    amount: 499,
+    status: "paid",
+    invoice: "INV-2024-1233",
+  },
+  {
+    id: 3,
+    date: "Dec 26, 2024",
+    organization: "Therapy Practice",
+    amount: 149,
+    status: "failed",
+    invoice: "INV-2024-1232",
+  },
+  {
+    id: 4,
+    date: "Dec 25, 2024",
+    organization: "Mental Health Services",
+    amount: 149,
+    status: "paid",
+    invoice: "INV-2024-1231",
+  },
+];
+
 export function BillingSubscriptions() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterPlan, setFilterPlan] = useState<string>("all");
@@ -56,6 +91,10 @@ export function BillingSubscriptions() {
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
+  const [processPaymentSubscriptionId, setProcessPaymentSubscriptionId] = useState<number | "">("");
+  const [processPaymentAmount, setProcessPaymentAmount] = useState<string>("");
+  const [processPaymentMethod, setProcessPaymentMethod] = useState<string>("credit_card");
 
   const handleExport = () => {
     // Determine what to export based on active tab
@@ -167,41 +206,6 @@ export function BillingSubscriptions() {
       mrr: 149,
       nextBilling: "Dec 28, 2024",
       startDate: "Feb 28, 2024",
-    },
-  ];
-
-  const transactions: Transaction[] = [
-    {
-      id: 1,
-      date: "Dec 28, 2024",
-      organization: "Healthcare Corp",
-      amount: 2499,
-      status: "paid",
-      invoice: "INV-2024-1234",
-    },
-    {
-      id: 2,
-      date: "Dec 27, 2024",
-      organization: "Wellness Clinic",
-      amount: 499,
-      status: "paid",
-      invoice: "INV-2024-1233",
-    },
-    {
-      id: 3,
-      date: "Dec 26, 2024",
-      organization: "Therapy Practice",
-      amount: 149,
-      status: "failed",
-      invoice: "INV-2024-1232",
-    },
-    {
-      id: 4,
-      date: "Dec 25, 2024",
-      organization: "Mental Health Services",
-      amount: 149,
-      status: "paid",
-      invoice: "INV-2024-1231",
     },
   ];
 
@@ -699,7 +703,15 @@ export function BillingSubscriptions() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Organization</label>
-                <select className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary">
+                <select
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
+                  value={processPaymentSubscriptionId}
+                  onChange={(e) =>
+                    setProcessPaymentSubscriptionId(
+                      e.target.value ? Number(e.target.value) : ""
+                    )
+                  }
+                >
                   <option value="">Select organization</option>
                   {subscriptions.map((sub) => (
                     <option key={sub.id} value={sub.id}>
@@ -718,13 +730,19 @@ export function BillingSubscriptions() {
                     placeholder="0.00"
                     className="pl-8"
                     step="0.01"
+                    value={processPaymentAmount}
+                    onChange={(e) => setProcessPaymentAmount(e.target.value)}
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-2">Payment Method</label>
-                <select className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary">
+                <select
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
+                  value={processPaymentMethod}
+                  onChange={(e) => setProcessPaymentMethod(e.target.value)}
+                >
                   <option value="credit_card">Credit Card</option>
                   <option value="bank_transfer">Bank Transfer</option>
                   <option value="paypal">PayPal</option>
@@ -762,7 +780,38 @@ export function BillingSubscriptions() {
                 <Button
                   className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
                   onClick={() => {
-                    console.log("Processing payment...");
+                    if (!processPaymentSubscriptionId || !processPaymentAmount) {
+                      console.log("Missing payment details");
+                      return;
+                    }
+
+                    const subscription = subscriptions.find(
+                      (sub) => sub.id === processPaymentSubscriptionId
+                    );
+
+                    const amountNumber = Number(processPaymentAmount);
+
+                    const nextId =
+                      transactions.length > 0
+                        ? Math.max(...transactions.map((t) => t.id)) + 1
+                        : 1;
+
+                    const newTransaction: Transaction = {
+                      id: nextId,
+                      date: new Date().toLocaleDateString(),
+                      organization: subscription?.organization || "Unknown",
+                      amount: isNaN(amountNumber) ? 0 : amountNumber,
+                      status: "paid",
+                      invoice: `INV-${new Date().getFullYear()}-${String(nextId).padStart(
+                        4,
+                        "0"
+                      )}`,
+                    };
+
+                    setTransactions([...transactions, newTransaction]);
+                    setProcessPaymentSubscriptionId("");
+                    setProcessPaymentAmount("");
+                    setProcessPaymentMethod("credit_card");
                     setShowProcessPaymentModal(false);
                   }}
                 >

@@ -230,14 +230,23 @@ export function HIPAACompliance() {
           <Card className="bg-white border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900">Audit Trail</h3>
-              <Button
-                variant="outline"
-                className="border-gray-300 text-gray-900 hover:bg-gray-100"
-                onClick={() => setShowAllAudits(!showAllAudits)}
-              >
-                <Eye className="w-4 h-4 mr-2" />
-                {showAllAudits ? "Hide All" : "View All"}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="border-gray-300 text-gray-900 hover:bg-gray-100"
+                  onClick={() => setShowAllAudits(!showAllAudits)}
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  {showAllAudits ? "Hide All" : "View All"}
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700"
+                  onClick={() => console.log("HIPAA audit log exported")}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Export Log
+                </Button>
+              </div>
             </div>
             <div className="space-y-3">
               {(showAllAudits ? allAuditTrail : auditTrail).map((entry) => (

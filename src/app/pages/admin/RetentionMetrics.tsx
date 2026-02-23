@@ -39,7 +39,6 @@ import { Button } from "@/app/components/ui/button";
 export function RetentionMetrics() {
   const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("30d");
 
-  // Cohort Retention Analysis
   const cohortRetentionData = [
     { cohort: "Jan 2024", week1: 92, week2: 85, week3: 78, week4: 72, month2: 65, month3: 58 },
     { cohort: "Feb 2024", week1: 94, week2: 87, week3: 80, week4: 74, month2: 67, month3: 60 },
@@ -50,7 +49,6 @@ export function RetentionMetrics() {
     { cohort: "Jul 2024", week1: 98, week2: 92, week3: 86, week4: 80, month2: 73, month3: null },
   ];
 
-  // Monthly Retention Curve
   const retentionCurveData = [
     { month: "Month 0", retention: 100 },
     { month: "Month 1", retention: 78 },
@@ -61,7 +59,6 @@ export function RetentionMetrics() {
     { month: "Month 12", retention: 45 },
   ];
 
-  // Churn Rate Over Time
   const churnRateData = [
     { month: "Jan", churnRate: 7.2, newUsers: 890, churned: 64 },
     { month: "Feb", churnRate: 6.8, newUsers: 1234, churned: 84 },
@@ -72,7 +69,6 @@ export function RetentionMetrics() {
     { month: "Jul", churnRate: 4.8, newUsers: 2340, churned: 112 },
   ];
 
-  // Trial to Paid Conversion
   const conversionData = [
     { week: "Week 1", trials: 500, converted: 45, rate: 9 },
     { week: "Week 2", trials: 650, converted: 78, rate: 12 },
@@ -84,7 +80,6 @@ export function RetentionMetrics() {
     { week: "Week 8", trials: 1520, converted: 319, rate: 21 },
   ];
 
-  // Lifetime Value Estimates
   const lifetimeValueData = [
     { segment: "Power Users", ltv: 2400, retention: 89, avgSpend: 49 },
     { segment: "Active Users", ltv: 1680, retention: 76, avgSpend: 39 },
@@ -92,19 +87,37 @@ export function RetentionMetrics() {
     { segment: "Casual Users", ltv: 480, retention: 42, avgSpend: 19 },
   ];
 
-  // Win-back Opportunities
   const winbackData = [
     { status: "At Risk (30 days inactive)", count: 456, potential: "$22,464" },
     { status: "Dormant (60 days inactive)", count: 234, potential: "$11,232" },
     { status: "Lost (90+ days inactive)", count: 123, potential: "$5,904" },
   ];
 
-  // Retention by User Type
   const retentionByTypeData = [
     { type: "Free", day7: 68, day30: 45, day90: 32 },
     { type: "Trial", day7: 82, day30: 64, day90: 48 },
     { type: "Premium", day7: 94, day30: 85, day90: 76 },
   ];
+
+  const getRangeFactor = () => {
+    if (timeRange === "7d") return 0.4;
+    if (timeRange === "30d") return 1;
+    return 2;
+  };
+
+  const rangeFactor = getRangeFactor();
+
+  const visibleChurnRate = (() => {
+    if (timeRange === "7d") return churnRateData.slice(0, 3);
+    if (timeRange === "30d") return churnRateData.slice(0, 5);
+    return churnRateData;
+  })();
+
+  const visibleRetentionCurve = (() => {
+    if (timeRange === "7d") return retentionCurveData.slice(0, 3);
+    if (timeRange === "30d") return retentionCurveData.slice(0, 5);
+    return retentionCurveData;
+  })();
 
   const stats = [
     {
@@ -143,7 +156,13 @@ export function RetentionMetrics() {
       color: "from-purple-500 to-pink-600",
       description: "per user",
     },
-  ];
+  ].map((stat) => ({
+    ...stat,
+    value:
+      stat.label === "30-Day Retention"
+        ? `${Math.min(100, Math.round(68 * rangeFactor))}%`
+        : stat.value,
+  }));
 
   const COLORS = ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b"];
 
@@ -376,7 +395,7 @@ export function RetentionMetrics() {
               </div>
 
               <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={retentionCurveData}>
+                <AreaChart data={visibleRetentionCurve}>
                   <defs>
                     <linearGradient id="colorRetention" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#ec4899" stopOpacity={0.8} />
@@ -424,7 +443,7 @@ export function RetentionMetrics() {
               </div>
 
               <ResponsiveContainer width="100%" height={300}>
-                <ComposedChart data={churnRateData}>
+                <ComposedChart data={visibleChurnRate}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                   <XAxis dataKey="month" stroke="#9ca3af" />
                   <YAxis yAxisId="left" stroke="#9ca3af" />

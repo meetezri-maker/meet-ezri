@@ -539,10 +539,20 @@ export function EnterpriseFeatures() {
                     </div>
                   ))}
                   <div className="flex gap-2 pt-4">
-                    <Button variant="outline" className="flex-1" onClick={() => setShowConfigModal(null)}>
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => setShowConfigModal(null)}
+                    >
                       Cancel
                     </Button>
-                    <Button className="flex-1">
+                    <Button
+                      className="flex-1"
+                      onClick={() => {
+                        console.log("Enterprise feature configuration saved:", showConfigModal?.id);
+                        setShowConfigModal(null);
+                      }}
+                    >
                       Save Changes
                     </Button>
                   </div>
