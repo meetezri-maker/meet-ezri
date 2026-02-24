@@ -74,6 +74,7 @@ export function NudgeScheduler() {
   const [deleteModalCampaign, setDeleteModalCampaign] = useState<NudgeCampaign | null>(null);
   const [analyticsModalCampaign, setAnalyticsModalCampaign] = useState<NudgeCampaign | null>(null);
   const [showCreateCampaignModal, setShowCreateCampaignModal] = useState(false);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const campaigns: NudgeCampaign[] = [
     {
@@ -445,6 +446,7 @@ export function NudgeScheduler() {
               <Button
                 variant="outline"
                 className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
               >
                 <Filter className="w-4 h-4 mr-2" />
                 Advanced Filters
@@ -453,259 +455,323 @@ export function NudgeScheduler() {
           </Card>
         </motion.div>
 
-        {/* Campaigns List */}
-        <div className="space-y-4">
-          {filteredCampaigns.map((campaign, index) => {
-            const TypeIcon = getTypeIcon(campaign.type);
-            const typeColor = getTypeColor(campaign.type);
-            const openRate =
-              campaign.performance.sent > 0
-                ? ((campaign.performance.opened / campaign.performance.sent) * 100).toFixed(1)
-                : "0.0";
+        {/* Campaigns List View */}
+        {viewMode === "list" && (
+          <div className="space-y-4">
+            {filteredCampaigns.map((campaign, index) => {
+              const TypeIcon = getTypeIcon(campaign.type);
+              const typeColor = getTypeColor(campaign.type);
+              const openRate =
+                campaign.performance.sent > 0
+                  ? ((campaign.performance.opened / campaign.performance.sent) * 100).toFixed(1)
+                  : "0.0";
 
-            return (
-              <motion.div
-                key={campaign.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <Card className="bg-white border border-gray-200 p-6 hover:shadow-lg transition-all">
-                  <div className="flex items-start gap-4">
-                    {/* Icon */}
-                    <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ backgroundColor: `${typeColor}20` }}
-                    >
-                      <TypeIcon className="w-6 h-6" style={{ color: typeColor }} />
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      {/* Header Row */}
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-bold text-gray-900 mb-1">
-                            {campaign.name}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            Template: {campaign.template}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2 ml-4">
-                          {campaign.abTest?.enabled && (
-                            <span className="px-2 py-1 bg-purple-50 text-purple-700 border border-purple-200 rounded text-xs font-medium">
-                              A/B Test
-                            </span>
-                          )}
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap ${getStatusColor(
-                              campaign.status
-                            )}`}
-                          >
-                            {campaign.status}
-                          </span>
-                        </div>
+              return (
+                <motion.div
+                  key={campaign.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <Card className="bg-white border border-gray-200 p-6 hover:shadow-lg transition-all">
+                    <div className="flex items-start gap-4">
+                      {/* Icon */}
+                      <div
+                        className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ backgroundColor: `${typeColor}20` }}
+                      >
+                        <TypeIcon className="w-6 h-6" style={{ color: typeColor }} />
                       </div>
 
-                      {/* Info Grid */}
-                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                        {/* Audience */}
-                        <div>
-                          <p className="text-xs text-gray-600 mb-1">Audience</p>
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        {/* Header Row */}
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <h3 className="text-lg font-bold text-gray-900 mb-1">
+                              {campaign.name}
+                            </h3>
+                            <p className="text-sm text-gray-600">
+                              Template: {campaign.template}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 ml-4">
+                            {campaign.abTest?.enabled && (
+                              <span className="px-2 py-1 bg-purple-50 text-purple-700 border border-purple-200 rounded text-xs font-medium">
+                                A/B Test
+                              </span>
+                            )}
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap ${getStatusColor(
+                                campaign.status
+                              )}`}
+                            >
+                              {campaign.status}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Info Grid */}
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                          {/* Audience */}
+                          <div>
+                            <p className="text-xs text-gray-600 mb-1">Audience</p>
+                            <div className="flex items-center gap-2">
+                              <Users className="w-4 h-4 text-blue-600" />
+                              <div>
+                                <p className="text-sm text-gray-900 font-medium">
+                                  {campaign.audience.count.toLocaleString()}
+                                </p>
+                                <p className="text-xs text-gray-600">
+                                  {campaign.audience.segment}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Trigger */}
+                          <div>
+                            <p className="text-xs text-gray-600 mb-1">Trigger</p>
+                            <p className="text-sm text-gray-900 font-medium">
+                              {campaign.trigger.type}
+                            </p>
+                            <p className="text-xs text-gray-600">
+                              {campaign.trigger.value}
+                            </p>
+                          </div>
+
+                          {/* Schedule */}
+                          <div>
+                            <p className="text-xs text-gray-600 mb-1">Schedule</p>
+                            <p className="text-sm text-gray-900 font-medium">
+                              {campaign.schedule.frequency}
+                            </p>
+                            <p className="text-xs text-gray-600">
+                              Since {campaign.schedule.startDate}
+                            </p>
+                          </div>
+
+                          {/* Performance */}
+                          <div>
+                            <p className="text-xs text-gray-600 mb-1">Performance</p>
+                            <p className="text-sm text-gray-900 font-medium">
+                              {openRate}% open rate
+                            </p>
+                            <p className="text-xs text-gray-600">
+                              {campaign.performance.sent.toLocaleString()} sent
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Performance Bar */}
+                        {campaign.performance.sent > 0 && (
+                          <div className="mb-4">
+                            <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
+                              <span>Conversion Funnel</span>
+                              <span>
+                                {(
+                                  (campaign.performance.converted /
+                                    campaign.performance.sent) *
+                                  100
+                                ).toFixed(1)}
+                                % converted
+                              </span>
+                            </div>
+                            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                              <div className="h-full flex">
+                                <div
+                                  className="bg-blue-500"
+                                  style={{
+                                    width: `${
+                                      (campaign.performance.opened /
+                                        campaign.performance.sent) *
+                                      100
+                                    }%`,
+                                  }}
+                                />
+                                <div
+                                  className="bg-green-500"
+                                  style={{
+                                    width: `${
+                                      (campaign.performance.clicked /
+                                        campaign.performance.sent) *
+                                      100
+                                    }%`,
+                                  }}
+                                />
+                                <div
+                                  className="bg-purple-500"
+                                  style={{
+                                    width: `${
+                                      (campaign.performance.converted /
+                                        campaign.performance.sent) *
+                                      100
+                                    }%`,
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4 mt-2 text-xs">
+                              <span className="flex items-center gap-1 text-gray-600">
+                                <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                                Opened
+                              </span>
+                              <span className="flex items-center gap-1 text-gray-600">
+                                <div className="w-2 h-2 bg-green-500 rounded-full" />
+                                Clicked
+                              </span>
+                              <span className="flex items-center gap-1 text-gray-600">
+                                <div className="w-2 h-2 bg-purple-500 rounded-full" />
+                                Converted
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Footer */}
+                        <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                          <div className="flex items-center gap-4 text-xs text-gray-600">
+                            <span>Last run: {campaign.lastRun}</span>
+                            <span>by {campaign.createdBy}</span>
+                          </div>
                           <div className="flex items-center gap-2">
-                            <Users className="w-4 h-4 text-blue-600" />
-                            <div>
-                              <p className="text-sm text-gray-900 font-medium">
-                                {campaign.audience.count.toLocaleString()}
-                              </p>
-                              <p className="text-xs text-gray-600">
-                                {campaign.audience.segment}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Trigger */}
-                        <div>
-                          <p className="text-xs text-gray-600 mb-1">Trigger</p>
-                          <p className="text-sm text-gray-900 font-medium">
-                            {campaign.trigger.type}
-                          </p>
-                          <p className="text-xs text-gray-600">
-                            {campaign.trigger.value}
-                          </p>
-                        </div>
-
-                        {/* Schedule */}
-                        <div>
-                          <p className="text-xs text-gray-600 mb-1">Schedule</p>
-                          <p className="text-sm text-gray-900 font-medium">
-                            {campaign.schedule.frequency}
-                          </p>
-                          <p className="text-xs text-gray-600">
-                            Since {campaign.schedule.startDate}
-                          </p>
-                        </div>
-
-                        {/* Performance */}
-                        <div>
-                          <p className="text-xs text-gray-600 mb-1">Performance</p>
-                          <p className="text-sm text-gray-900 font-medium">
-                            {openRate}% open rate
-                          </p>
-                          <p className="text-xs text-gray-600">
-                            {campaign.performance.sent.toLocaleString()} sent
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Performance Bar */}
-                      {campaign.performance.sent > 0 && (
-                        <div className="mb-4">
-                          <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
-                            <span>Conversion Funnel</span>
-                            <span>
-                              {(
-                                (campaign.performance.converted /
-                                  campaign.performance.sent) *
-                                100
-                              ).toFixed(1)}
-                              % converted
-                            </span>
-                          </div>
-                          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                            <div className="h-full flex">
-                              <div
-                                className="bg-blue-500"
-                                style={{
-                                  width: `${
-                                    (campaign.performance.opened /
-                                      campaign.performance.sent) *
-                                    100
-                                  }%`,
-                                }}
-                              />
-                              <div
-                                className="bg-green-500"
-                                style={{
-                                  width: `${
-                                    (campaign.performance.clicked /
-                                      campaign.performance.sent) *
-                                    100
-                                  }%`,
-                                }}
-                              />
-                              <div
-                                className="bg-purple-500"
-                                style={{
-                                  width: `${
-                                    (campaign.performance.converted /
-                                      campaign.performance.sent) *
-                                    100
-                                  }%`,
-                                }}
-                              />
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4 mt-2 text-xs">
-                            <span className="flex items-center gap-1 text-gray-600">
-                              <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                              Opened
-                            </span>
-                            <span className="flex items-center gap-1 text-gray-600">
-                              <div className="w-2 h-2 bg-green-500 rounded-full" />
-                              Clicked
-                            </span>
-                            <span className="flex items-center gap-1 text-gray-600">
-                              <div className="w-2 h-2 bg-purple-500 rounded-full" />
-                              Converted
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Footer */}
-                      <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                        <div className="flex items-center gap-4 text-xs text-gray-600">
-                          <span>Last run: {campaign.lastRun}</span>
-                          <span>by {campaign.createdBy}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-gray-600 hover:text-gray-900"
-                            onClick={() => setViewModalCampaign(campaign)}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-gray-600 hover:text-gray-900"
-                            onClick={() => {
-                              alert(`Copied campaign: ${campaign.name}`);
-                            }}
-                          >
-                            <Copy className="w-4 h-4" />
-                          </Button>
-                          {campaign.status === "active" && (
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="text-yellow-600 hover:text-yellow-700"
-                              onClick={() => alert(`Paused: ${campaign.name}`)}
+                              className="text-gray-600 hover:text-gray-900"
+                              onClick={() => setViewModalCampaign(campaign)}
                             >
-                              <Pause className="w-4 h-4" />
+                              <Eye className="w-4 h-4" />
                             </Button>
-                          )}
-                          {campaign.status === "paused" && (
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="text-green-600 hover:text-green-700"
-                              onClick={() => alert(`Activated: ${campaign.name}`)}
+                              className="text-gray-600 hover:text-gray-900"
+                              onClick={() => {
+                                alert(`Copied campaign: ${campaign.name}`);
+                              }}
                             >
-                              <Play className="w-4 h-4" />
+                              <Copy className="w-4 h-4" />
                             </Button>
-                          )}
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-gray-600 hover:text-gray-900"
-                            onClick={() => setAnalyticsModalCampaign(campaign)}
-                          >
-                            <BarChart3 className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-blue-600 hover:text-blue-700"
-                            onClick={() => setEditModalCampaign(campaign)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-red-600 hover:text-red-700"
-                            onClick={() => setDeleteModalCampaign(campaign)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                            {campaign.status === "active" && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-yellow-600 hover:text-yellow-700"
+                                onClick={() => alert(`Paused: ${campaign.name}`)}
+                              >
+                                <Pause className="w-4 h-4" />
+                              </Button>
+                            )}
+                            {campaign.status === "paused" && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-green-600 hover:text-green-700"
+                                onClick={() => alert(`Activated: ${campaign.name}`)}
+                              >
+                                <Play className="w-4 h-4" />
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-gray-600 hover:text-gray-900"
+                              onClick={() => setAnalyticsModalCampaign(campaign)}
+                            >
+                              <BarChart3 className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-blue-600 hover:text-blue-700"
+                              onClick={() => setEditModalCampaign(campaign)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-red-600 hover:text-red-700"
+                              onClick={() => setDeleteModalCampaign(campaign)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </div>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Calendar View */}
+        {viewMode === "calendar" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <Card className="bg-white border border-gray-200 p-6">
+              <div className="text-center py-12">
+                <CalendarIcon className="w-20 h-20 text-purple-500 mx-auto mb-4" />
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Calendar View</h3>
+                <p className="text-gray-600 mb-6">
+                  View your nudge campaigns in a calendar layout. This feature helps you visualize campaign schedules across time.
+                </p>
+                <div className="grid grid-cols-7 gap-2 max-w-4xl mx-auto">
+                  {/* Calendar Header */}
+                  {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                    <div key={day} className="text-center font-semibold text-gray-700 py-2">
+                      {day}
+                    </div>
+                  ))}
+                  {/* Calendar Days */}
+                  {Array.from({ length: 35 }, (_, i) => {
+                    const dayNum = i - 2;
+                    const isCurrentMonth = dayNum >= 1 && dayNum <= 31;
+                    const hasCampaign = isCurrentMonth && [5, 10, 15, 20, 25].includes(dayNum);
+                    return (
+                      <div
+                        key={i}
+                        className={`aspect-square p-2 border rounded-lg relative ${
+                          isCurrentMonth
+                            ? hasCampaign
+                              ? "bg-purple-50 border-purple-200 cursor-pointer hover:bg-purple-100"
+                              : "bg-white border-gray-200 hover:bg-gray-50"
+                            : "bg-gray-50 border-gray-100 text-gray-400"
+                        }`}
+                      >
+                        <div className="text-sm font-medium">
+                          {dayNum > 0 && dayNum <= 31 ? dayNum : dayNum <= 0 ? 28 + dayNum : dayNum - 31}
+                        </div>
+                        {hasCampaign && (
+                          <div className="absolute bottom-1 left-1 right-1">
+                            <div className="h-1 bg-purple-500 rounded-full mb-0.5"></div>
+                            <div className="text-xs text-purple-700 font-medium">
+                              {Math.floor(Math.random() * 3) + 1}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-6 flex items-center justify-center gap-4 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                    <span>Scheduled Campaigns</span>
                   </div>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </div>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        )}
 
         {/* Empty State */}
-        {filteredCampaigns.length === 0 && (
+        {filteredCampaigns.length === 0 && viewMode === "list" && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -1245,6 +1311,115 @@ export function NudgeScheduler() {
                     }}>
                       <Save className="w-4 h-4 mr-2" />
                       Create Campaign
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Advanced Filters Modal */}
+        <AnimatePresence>
+          {showAdvancedFilters && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+              onClick={() => setShowAdvancedFilters(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold">Advanced Filters</h2>
+                  <Button variant="ghost" size="sm" onClick={() => setShowAdvancedFilters(false)}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Campaign Name</label>
+                    <Input placeholder="Search by name..." />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Created By</label>
+                      <select className="w-full px-3 py-2 border rounded-lg">
+                        <option value="all">All Creators</option>
+                        <option value="sarah">Sarah Chen</option>
+                        <option value="michael">Dr. Michael Ross</option>
+                        <option value="emma">Emma Wilson</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">A/B Testing</label>
+                      <select className="w-full px-3 py-2 border rounded-lg">
+                        <option value="all">All</option>
+                        <option value="enabled">Enabled</option>
+                        <option value="disabled">Disabled</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Start Date (From)</label>
+                      <Input type="date" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Start Date (To)</label>
+                      <Input type="date" />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Min Sent Count</label>
+                      <Input type="number" placeholder="0" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Min Open Rate (%)</label>
+                      <Input type="number" placeholder="0" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Audience Segment</label>
+                    <Input placeholder="Search by segment..." />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Trigger Type</label>
+                    <select className="w-full px-3 py-2 border rounded-lg">
+                      <option value="all">All Triggers</option>
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="event">Event</option>
+                      <option value="inactivity">Inactivity</option>
+                    </select>
+                  </div>
+
+                  <div className="flex gap-2 pt-4 border-t">
+                    <Button variant="outline" className="flex-1" onClick={() => {
+                      alert('Filters reset!');
+                      setShowAdvancedFilters(false);
+                    }}>
+                      Reset Filters
+                    </Button>
+                    <Button className="flex-1 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white" onClick={() => {
+                      alert('Filters applied!');
+                      setShowAdvancedFilters(false);
+                    }}>
+                      <Filter className="w-4 h-4 mr-2" />
+                      Apply Filters
                     </Button>
                   </div>
                 </div>

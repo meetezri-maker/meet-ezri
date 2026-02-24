@@ -294,13 +294,13 @@ export function NudgePerformance() {
               Export Report
             </Button>
 
-            <Button
+            {/* <Button
               variant="outline"
               className="border-gray-300 text-gray-700 hover:bg-gray-100"
               onClick={() => window.location.reload()}
             >
               <RefreshCw className="w-4 h-4" />
-            </Button>
+            </Button> */}
           </div>
         </motion.div>
 
