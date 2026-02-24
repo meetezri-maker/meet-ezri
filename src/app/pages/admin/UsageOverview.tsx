@@ -31,7 +31,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Card } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 
@@ -39,10 +39,17 @@ export function UsageOverview() {
   const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("30d");
   const [viewMode, setViewMode] = useState<"daily" | "weekly" | "monthly">("daily");
 
-  const dataPoints = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
+  // Generate data based on time range
+  const getDataPoints = () => {
+    if (timeRange === "7d") return 7;
+    if (timeRange === "30d") return 30;
+    return 90;
+  };
+
+  const dataPoints = getDataPoints();
 
   // Mock DAU/MAU/WAU Data - dynamically generated
-  const dailyActiveUsersData = useMemo(() => Array.from({ length: dataPoints }, (_, i) => {
+  const dailyActiveUsersData = Array.from({ length: dataPoints }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() - (dataPoints - 1 - i));
     const dateStr = timeRange === "90d"
@@ -55,10 +62,10 @@ export function UsageOverview() {
       mau: 3800 + Math.floor(Math.random() * 600) + i * 10,
       wau: 2300 + Math.floor(Math.random() * 600) + i * 7,
     };
-  }), [dataPoints, timeRange]);
+  });
 
   // Session Data - dynamically generated
-  const sessionData = useMemo(() => Array.from({ length: dataPoints }, (_, i) => {
+  const sessionData = Array.from({ length: dataPoints }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() - (dataPoints - 1 - i));
     const dateStr = timeRange === "90d"
@@ -74,13 +81,10 @@ export function UsageOverview() {
       avgDuration: parseFloat(avgDuration.toFixed(1)),
       totalMinutes: Math.floor(sessions * avgDuration),
     };
-  }), [dataPoints, timeRange]);
-
-  // Scale factors based on time range
-  const rangeFactor = timeRange === "7d" ? 1 : timeRange === "30d" ? 3.5 : 10;
+  });
 
   // Peak Usage Hours
-  const peakUsageData = useMemo(() => [
+  const peakUsageData = [
     { hour: "12 AM", users: 120 },
     { hour: "1 AM", users: 85 },
     { hour: "2 AM", users: 65 },
@@ -105,62 +109,66 @@ export function UsageOverview() {
     { hour: "9 PM", users: 1189 },
     { hour: "10 PM", users: 945 },
     { hour: "11 PM", users: 567 },
-  ].map(d => ({ ...d, users: Math.round(d.users * (1 + (rangeFactor - 1) * 0.2)) })), [rangeFactor]);
+  ];
 
   // User Activity Distribution
-  const activityDistribution = useMemo(() => [
+  const activityDistribution = [
     { name: "Power Users (>10 sessions/week)", value: 456, color: "#8b5cf6" },
     { name: "Active Users (5-10 sessions/week)", value: 1234, color: "#3b82f6" },
     { name: "Regular Users (2-4 sessions/week)", value: 2345, color: "#10b981" },
     { name: "Casual Users (1 session/week)", value: 890, color: "#f59e0b" },
     { name: "Inactive (no sessions this week)", value: 456, color: "#6b7280" },
-  ].map(d => ({ ...d, value: Math.round(d.value * rangeFactor) })), [rangeFactor]);
+  ];
 
-  const stats = useMemo(() => {
-    const totalSessions = sessionData.reduce((acc, curr) => acc + curr.sessions, 0);
-    const totalMinutes = sessionData.reduce((acc, curr) => acc + curr.totalMinutes, 0);
-    const avgDuration = totalSessions > 0 ? totalMinutes / totalSessions : 0;
-    const avgDau = dailyActiveUsersData.reduce((acc, curr) => acc + curr.dau, 0) / dataPoints;
+  // Calculate stats based on the generated data
+  const latestDayData = dailyActiveUsersData[dailyActiveUsersData.length - 1];
+  const latestSessionData = sessionData[sessionData.length - 1];
+  const totalSessions = sessionData.reduce((sum, day) => sum + day.sessions, 0);
+  const totalMinutes = sessionData.reduce((sum, day) => sum + day.totalMinutes, 0);
+  const avgSessionDuration =
+    sessionData.reduce((sum, day) => sum + day.avgDuration, 0) / sessionData.length;
 
-    return [
-      {
-        label: "Avg Daily Active Users",
-        value: Math.round(avgDau).toLocaleString(),
-        change: "+12.5%",
-        trend: "up" as const,
-        icon: Users,
-        color: "from-blue-500 to-cyan-600",
-        description: "vs last period",
-      },
-      {
-        label: `Total Sessions (${timeRange})`,
-        value: totalSessions.toLocaleString(),
-        change: "+8.3%",
-        trend: "up" as const,
-        icon: Activity,
-        color: "from-purple-500 to-pink-600",
-        description: "sessions started",
-      },
-      {
-        label: "Total Minutes Consumed",
-        value: totalMinutes.toLocaleString(),
-        change: "+15.7%",
-        trend: "up" as const,
-        icon: Clock,
-        color: "from-green-500 to-emerald-600",
-        description: "therapy minutes",
-      },
-      {
-        label: "Avg Session Duration",
-        value: `${avgDuration.toFixed(1)} min`,
-        change: "+3.2%",
-        trend: "up" as const,
-        icon: Target,
-        color: "from-orange-500 to-red-600",
-        description: "per session",
-      },
-    ];
-  }, [sessionData, dailyActiveUsersData, dataPoints, timeRange]);
+  const stats = [
+    {
+      label:
+        timeRange === "7d"
+          ? "Daily Active Users"
+          : "Average Active Users",
+      value: latestDayData.dau.toLocaleString(),
+      change: "+12.5%",
+      trend: "up" as const,
+      icon: Users,
+      color: "from-blue-500 to-cyan-600",
+      description: "vs last period",
+    },
+    {
+      label: `Total Sessions (${timeRange})`,
+      value: totalSessions.toLocaleString(),
+      change: "+8.3%",
+      trend: "up" as const,
+      icon: Activity,
+      color: "from-purple-500 to-pink-600",
+      description: "sessions started",
+    },
+    {
+      label: "Total Minutes Consumed",
+      value: totalMinutes.toLocaleString(),
+      change: "+15.7%",
+      trend: "up" as const,
+      icon: Clock,
+      color: "from-green-500 to-emerald-600",
+      description: "therapy minutes",
+    },
+    {
+      label: "Avg Session Duration",
+      value: `${avgSessionDuration.toFixed(1)} min`,
+      change: "+3.2%",
+      trend: "up" as const,
+      icon: Target,
+      color: "from-orange-500 to-red-600",
+      description: "per session",
+    },
+  ];
 
   const COLORS = ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b", "#6b7280"];
 

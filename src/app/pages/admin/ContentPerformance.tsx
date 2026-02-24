@@ -264,7 +264,30 @@ export function ContentPerformance() {
               ))}
             </div>
 
-            <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white">
+            <Button 
+              className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+              onClick={() => {
+                console.log('Exporting content performance report...');
+                const reportData = {
+                  stats,
+                  performanceData,
+                  topContent,
+                  contentTypeData,
+                  categoryEngagement,
+                  completionRates,
+                  trendingData,
+                  timeRange,
+                  generatedAt: new Date().toISOString(),
+                };
+                const dataStr = JSON.stringify(reportData, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                const exportFileDefaultName = `content-performance-${timeRange}-${new Date().toISOString().split('T')[0]}.json`;
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+              }}
+            >
               <Download className="w-4 h-4 mr-2" />
               Export Report
             </Button>

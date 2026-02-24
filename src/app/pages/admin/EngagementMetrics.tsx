@@ -35,7 +35,7 @@ import {
   ComposedChart,
   Area,
 } from "recharts";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Card } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 
@@ -44,7 +44,7 @@ export function EngagementMetrics() {
 
   // Generate weeks based on time range
   const getWeeks = () => {
-    if (timeRange === "7d") return 7; // Changed to days for 7d view
+    if (timeRange === "7d") return 1;
     if (timeRange === "30d") return 4;
     return 13; // 90 days = approximately 13 weeks
   };
@@ -52,32 +52,30 @@ export function EngagementMetrics() {
   const weeks = getWeeks();
 
   // Engagement Score Trend - dynamically generated based on timeRange
-  const engagementTrendData = useMemo(() => Array.from({ length: weeks }, (_, i) => ({
+  const engagementTrendData = Array.from({ length: weeks }, (_, i) => ({
     date: timeRange === "7d" ? `Day ${i + 1}` : `Week ${i + 1}`,
-    score: Math.min(100, 72 + i * 2 + Math.floor(Math.random() * 5)),
+    score: 72 + i * 2 + Math.floor(Math.random() * 3),
     sessions: 2890 + i * 150 + Math.floor(Math.random() * 200),
     journalEntries: 456 + i * 40 + Math.floor(Math.random() * 50),
-  })), [weeks, timeRange]);
-
-  const rangeFactor = timeRange === "7d" ? 1 : timeRange === "30d" ? 3.5 : 10;
+  }));
 
   // Session Frequency Analysis
-  const sessionFrequencyData = useMemo(() => [
+  const sessionFrequencyData = [
     { range: "1-2 times/week", users: 890, percentage: 18 },
     { range: "3-4 times/week", users: 1456, percentage: 29 },
     { range: "5-6 times/week", users: 1823, percentage: 37 },
     { range: "Daily (7+)", users: 812, percentage: 16 },
-  ].map(d => ({ ...d, users: Math.round(d.users * rangeFactor) })), [rangeFactor]);
+  ];
 
   // Feature Engagement
-  const featureEngagementData = useMemo(() => [
+  const featureEngagementData = [
     { feature: "AI Sessions", usage: 95, satisfaction: 4.8 },
     { feature: "Mood Tracking", usage: 89, satisfaction: 4.6 },
     { feature: "Journaling", usage: 72, satisfaction: 4.7 },
     { feature: "Wellness Tools", usage: 68, satisfaction: 4.5 },
     { feature: "Progress Reports", usage: 54, satisfaction: 4.3 },
     { feature: "Community", usage: 42, satisfaction: 4.2 },
-  ].map(d => ({ ...d, usage: Math.min(100, Math.round(d.usage * (1 + (Math.random() * 0.1 - 0.05)))) })), [timeRange]); // Vary slightly
+  ];
 
   // User Journey Engagement
   const userJourneyData = [
@@ -103,57 +101,60 @@ export function EngagementMetrics() {
   ];
 
   // Engagement by Time of Day
-  const timeOfDayEngagement = useMemo(() => [
+  const timeOfDayEngagement = [
     { time: "Morning (6-12)", engagement: 78, sessions: 1234 },
     { time: "Afternoon (12-6)", engagement: 85, sessions: 1890 },
     { time: "Evening (6-10)", engagement: 92, sessions: 2456 },
     { time: "Night (10-6)", engagement: 62, sessions: 567 },
-  ].map(d => ({ ...d, sessions: Math.round(d.sessions * rangeFactor) })), [rangeFactor]);
+  ];
 
-  const stats = useMemo(() => {
-    const avgScore = Math.round(engagementTrendData.reduce((acc, curr) => acc + curr.score, 0) / weeks);
-    const avgFrequency = (sessionFrequencyData.reduce((acc, curr) => acc + (curr.users * (curr.range.includes("1-2") ? 1.5 : curr.range.includes("3-4") ? 3.5 : curr.range.includes("5-6") ? 5.5 : 7)), 0) / sessionFrequencyData.reduce((acc, curr) => acc + curr.users, 0)).toFixed(1);
-    const avgAdoption = Math.round(featureEngagementData.reduce((acc, curr) => acc + curr.usage, 0) / featureEngagementData.length);
-    
-    return [
-      {
-        label: "Overall Engagement Score",
-        value: `${avgScore}%`,
-        change: "+2.3%",
-        trend: "up" as const,
-        icon: Heart,
-        color: "from-pink-500 to-rose-600",
-        description: "vs last period",
-      },
-      {
-        label: "Avg Session Frequency",
-        value: `${avgFrequency}x/week`,
-        change: "+0.5x",
-        trend: "up" as const,
-        icon: Activity,
-        color: "from-purple-500 to-indigo-600",
-        description: "per user",
-      },
-      {
-        label: "Feature Adoption Rate",
-        value: `${avgAdoption}%`,
-        change: "+4.2%",
-        trend: "up" as const,
-        icon: Zap,
-        color: "from-cyan-500 to-blue-600",
-        description: "of all features",
-      },
-      {
-        label: "7-Day Return Rate",
-        value: "76%",
-        change: "-1.8%",
-        trend: "down" as const,
-        icon: Target,
-        color: "from-orange-500 to-red-600",
-        description: "users returning",
-      },
-    ];
-  }, [engagementTrendData, sessionFrequencyData, featureEngagementData, weeks]);
+  // Calculate stats based on the generated data
+  const avgEngagementScore = Math.round(
+    engagementTrendData.reduce((sum, d) => sum + d.score, 0) / engagementTrendData.length
+  );
+  const avgSessions = Math.round(
+    engagementTrendData.reduce((sum, d) => sum + d.sessions, 0) / engagementTrendData.length
+  );
+  const totalJournalEntries = engagementTrendData.reduce((sum, d) => sum + d.journalEntries, 0);
+
+  const stats = [
+    {
+      label: "Overall Engagement Score",
+      value: `${avgEngagementScore}%`,
+      change: "+2.3%",
+      trend: "up" as const,
+      icon: Heart,
+      color: "from-pink-500 to-rose-600",
+      description: "vs last period",
+    },
+    {
+      label: `Total Sessions (${timeRange})`,
+      value: avgSessions.toLocaleString(),
+      change: "+0.5x",
+      trend: "up" as const,
+      icon: Activity,
+      color: "from-purple-500 to-indigo-600",
+      description: "average per period",
+    },
+    {
+      label: "Total Journal Entries",
+      value: totalJournalEntries.toLocaleString(),
+      change: "+4.2%",
+      trend: "up" as const,
+      icon: Zap,
+      color: "from-cyan-500 to-blue-600",
+      description: `in ${timeRange}`,
+    },
+    {
+      label: "7-Day Return Rate",
+      value: "76%",
+      change: "-1.8%",
+      trend: "down" as const,
+      icon: Target,
+      color: "from-orange-500 to-red-600",
+      description: "users returning",
+    },
+  ];
 
   return (
     <AdminLayoutNew>

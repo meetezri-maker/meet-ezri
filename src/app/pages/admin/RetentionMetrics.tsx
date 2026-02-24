@@ -124,10 +124,20 @@ export function RetentionMetrics() {
     { type: "Premium", day7: 94, day30: 85, day90: 76 },
   ];
 
+  // Calculate stats based on the generated data
+  const avgRetention30Day = Math.round(
+    cohortRetentionData.reduce((sum, c) => sum + c.week4, 0) / cohortRetentionData.length
+  );
+  const latestChurnRate = churnRateData[churnRateData.length - 1].churnRate;
+  const latestConversionRate = conversionData[conversionData.length - 1].rate;
+  const avgLTV = Math.round(
+    lifetimeValueData.reduce((sum, d) => sum + d.ltv, 0) / lifetimeValueData.length
+  );
+
   const stats = [
     {
       label: "30-Day Retention",
-      value: "68%",
+      value: `${avgRetention30Day}%`,
       change: "+3.2%",
       trend: "up" as const,
       icon: Users,
@@ -136,7 +146,7 @@ export function RetentionMetrics() {
     },
     {
       label: "Churn Rate",
-      value: "4.8%",
+      value: `${latestChurnRate}%`,
       change: "-0.6%",
       trend: "up" as const,
       icon: AlertCircle,
@@ -145,7 +155,7 @@ export function RetentionMetrics() {
     },
     {
       label: "Trial Conversion",
-      value: "21%",
+      value: `${latestConversionRate}%`,
       change: "+2.1%",
       trend: "up" as const,
       icon: Target,
@@ -154,7 +164,7 @@ export function RetentionMetrics() {
     },
     {
       label: "Avg Lifetime Value",
-      value: "$1,380",
+      value: `$${avgLTV.toLocaleString()}`,
       change: "+$180",
       trend: "up" as const,
       icon: DollarSign,
@@ -645,6 +655,10 @@ export function RetentionMetrics() {
                     <Button
                       size="sm"
                       className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+                      onClick={() => {
+                        console.log(`Launching win-back campaign for: ${item.status}`);
+                        alert(`Win-back campaign would be launched for ${item.count} users (${item.status}). This feature requires backend integration.`);
+                      }}
                     >
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Launch Win-back Campaign
