@@ -73,9 +73,86 @@ export function Analytics() {
     return 4;
   };
 
+  const rangeFactor = getRangeFactor();
+
+  // Dynamic Data Generation
+  const visibleUserGrowth = userGrowthData.map(item => ({
+    ...item,
+    users: Math.round(item.users * rangeFactor),
+    active: Math.round(item.active * rangeFactor),
+    premium: Math.round(item.premium * rangeFactor),
+  }));
+
+  const visibleSessionData = sessionData.map(item => ({
+    ...item,
+    sessions: Math.round(item.sessions * rangeFactor),
+    duration: Math.round(item.duration * (1 + (rangeFactor - 1) * 0.1)), // Duration changes less drastically
+  }));
+
+  const visibleUserTypeData = userTypeData.map(item => ({
+    ...item,
+    value: Math.round(item.value * rangeFactor)
+  }));
+
+  const visibleFeatureUsageData = featureUsageData.map(item => ({
+    ...item,
+    usage: Math.min(100, Math.round(item.usage * (0.8 + Math.random() * 0.4))) // Randomize slightly based on range re-render
+  }));
+
+  const visibleRevenueData = revenueData.map(item => ({
+    ...item,
+    revenue: Math.round(item.revenue * rangeFactor),
+    recurring: Math.round(item.recurring * rangeFactor),
+    oneTime: Math.round(item.oneTime * rangeFactor),
+  }));
+
+  const stats = [
+    {
+      label: "Total Revenue",
+      value: 127500,
+      change: "+23.5%",
+      trend: "up",
+      icon: DollarSign,
+      color: "from-green-500 to-emerald-600",
+      prefix: "$"
+    },
+    {
+      label: "Active Users",
+      value: 1205,
+      change: "+18.2%",
+      trend: "up",
+      icon: Users,
+      color: "from-blue-500 to-indigo-600",
+      prefix: ""
+    },
+    {
+      label: "Avg Engagement",
+      value: 82,
+      change: "+5.7%",
+      trend: "up",
+      icon: Activity,
+      color: "from-purple-500 to-pink-600",
+      prefix: "",
+      suffix: "%"
+    },
+    {
+      label: "Conversion Rate",
+      value: 14.8,
+      change: "-2.1%",
+      trend: "down",
+      icon: Target,
+      color: "from-orange-500 to-red-600",
+      prefix: "",
+      suffix: "%"
+    }
+  ].map((stat) => ({
+    ...stat,
+    value: `${stat.prefix || ""}${Math.round(stat.value * (stat.suffix ? 1 : rangeFactor)).toLocaleString()}${stat.suffix || ""}`,
+  }));
+
   const handleExport = () => {
     const headers = ["Month", "Total Revenue", "Recurring", "One-Time"];
-    const rows = revenueData.map((item) => [
+    const rows = visibleRevenueData.map((item) => [
       item.month,
       item.revenue,
       item.recurring,
@@ -98,69 +175,6 @@ export function Analytics() {
     window.URL.revokeObjectURL(url);
   };
 
-  const rangeFactor = getRangeFactor();
-
-  const visibleUserGrowth = (() => {
-    if (timeRange === "7d") return userGrowthData.slice(-2);
-    if (timeRange === "30d") return userGrowthData.slice(-4);
-    if (timeRange === "90d") return userGrowthData;
-    return userGrowthData;
-  })();
-
-  const visibleSessionData = (() => {
-    if (timeRange === "7d") return sessionData.slice(0, 3);
-    if (timeRange === "30d") return sessionData.slice(0, 5);
-    return sessionData;
-  })();
-
-  const adjustedRevenueData = revenueData.map((item) => ({
-    ...item,
-    revenue: Math.round(item.revenue * rangeFactor),
-    recurring: Math.round(item.recurring * rangeFactor),
-    oneTime: Math.round(item.oneTime * rangeFactor),
-  }));
-
-  const stats = [
-    {
-      label: "Total Revenue",
-      value: "$127,500",
-      change: "+23.5%",
-      trend: "up",
-      icon: DollarSign,
-      color: "from-green-500 to-emerald-600"
-    },
-    {
-      label: "Active Users",
-      value: "1,205",
-      change: "+18.2%",
-      trend: "up",
-      icon: Users,
-      color: "from-blue-500 to-indigo-600"
-    },
-    {
-      label: "Avg Engagement",
-      value: "82%",
-      change: "+5.7%",
-      trend: "up",
-      icon: Activity,
-      color: "from-purple-500 to-pink-600"
-    },
-    {
-      label: "Conversion Rate",
-      value: "14.8%",
-      change: "-2.1%",
-      trend: "down",
-      icon: Target,
-      color: "from-orange-500 to-red-600"
-    }
-  ].map((stat) => ({
-    ...stat,
-    value:
-      stat.label === "Total Revenue"
-        ? `$${Math.round(127500 * rangeFactor).toLocaleString()}`
-        : stat.value,
-  }));
-
   return (
     <AdminLayoutNew>
       <div className="max-w-7xl mx-auto space-y-6">
@@ -176,16 +190,21 @@ export function Analytics() {
           </div>
 
           <div className="flex gap-3">
-            <select
-              value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
-              className="px-4 py-2 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-blue-500 outline-none"
-            >
-              <option value="7d">Last 7 days</option>
-              <option value="30d">Last 30 days</option>
-              <option value="90d">Last 90 days</option>
-              <option value="1y">Last year</option>
-            </select>
+            <div className="flex items-center gap-2 bg-gray-100 rounded-xl p-1 border border-gray-200">
+              {(["7d", "30d", "90d"] as const).map((range) => (
+                <button
+                  key={range}
+                  onClick={() => setTimeRange(range)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    timeRange === range
+                      ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg"
+                      : "text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  {range === "7d" ? "7 Days" : range === "30d" ? "30 Days" : "90 Days"}
+                </button>
+              ))}
+            </div>
 
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -311,7 +330,7 @@ export function Analytics() {
             <ResponsiveContainer width="100%" height={300}>
               <RechartsPie>
                 <Pie
-                  data={userTypeData}
+                  data={visibleUserTypeData}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -320,7 +339,7 @@ export function Analytics() {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {userTypeData.map((entry, index) => (
+                  {visibleUserTypeData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -339,7 +358,7 @@ export function Analytics() {
         >
           <h2 className="text-xl font-bold text-gray-900 mb-6">Feature Usage Rate</h2>
           <div className="space-y-4">
-            {featureUsageData.map((item, index) => (
+            {visibleFeatureUsageData.map((item, index) => (
               <motion.div
                 key={item.feature}
                 initial={{ opacity: 0, x: -20 }}
@@ -378,7 +397,7 @@ export function Analytics() {
             <DollarSign className="w-5 h-5 text-green-500" />
           </div>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={revenueData}>
+            <LineChart data={visibleRevenueData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="month" stroke="#6b7280" />
               <YAxis stroke="#6b7280" />

@@ -30,23 +30,34 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 
 export function NudgePerformance() {
   const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("30d");
 
-  // Overall Performance Trend
-  const performanceTrend = [
-    { date: "Week 1", sent: 12450, opened: 9960, clicked: 6225, converted: 4980 },
-    { date: "Week 2", sent: 15230, opened: 12184, clicked: 7615, converted: 6092 },
-    { date: "Week 3", sent: 18900, opened: 15120, clicked: 9450, converted: 7560 },
-    { date: "Week 4", sent: 21340, opened: 17072, clicked: 10670, converted: 8536 },
-  ];
+  // Overall Performance Trend - dynamic
+  const performanceTrend = useMemo(() => {
+    const points = timeRange === "7d" ? 7 : timeRange === "30d" ? 4 : 12;
+    return Array.from({ length: points }, (_, i) => {
+      const label = timeRange === "7d" ? `Day ${i + 1}` : timeRange === "30d" ? `Week ${i + 1}` : `Week ${i + 1}`;
+      const baseSent = timeRange === "7d" ? 2000 : 12000;
+      const growth = 1 + (i * 0.1);
+      
+      const sent = Math.round(baseSent * growth + Math.random() * (baseSent * 0.2));
+      const opened = Math.round(sent * (0.7 + Math.random() * 0.1));
+      const clicked = Math.round(opened * (0.5 + Math.random() * 0.1));
+      const converted = Math.round(clicked * (0.4 + Math.random() * 0.1));
+
+      return { date: label, sent, opened, clicked, converted };
+    });
+  }, [timeRange]);
+
+  const rangeFactor = timeRange === "7d" ? 1 : timeRange === "30d" ? 4 : 12;
 
   // Campaign Performance Comparison
-  const campaignPerformance = [
+  const campaignPerformance = useMemo(() => [
     {
       name: "Morning Mood Check-in",
       sent: 8640,
@@ -87,17 +98,23 @@ export function NudgePerformance() {
       clickRate: 30,
       conversionRate: 20,
     },
-  ];
+  ].map(c => ({
+    ...c,
+    sent: Math.round(c.sent * rangeFactor),
+    opened: Math.round(c.opened * rangeFactor),
+    clicked: Math.round(c.clicked * rangeFactor),
+    converted: Math.round(c.converted * rangeFactor),
+  })), [rangeFactor]);
 
   // Channel Performance
-  const channelData = [
+  const channelData = useMemo(() => [
     { name: "Push Notification", value: 45, count: 12450, color: "#3b82f6" },
     { name: "Email", value: 30, count: 8300, color: "#10b981" },
     { name: "In-App", value: 20, count: 5533, color: "#f59e0b" },
     { name: "SMS", value: 5, count: 1383, color: "#ec4899" },
-  ];
+  ].map(d => ({ ...d, count: Math.round(d.count * rangeFactor) })), [rangeFactor]);
 
-  // Time-of-Day Performance
+  // Time-of-Day Performance (Rates likely stay similar, but let's vary slightly or keep static as rates)
   const timePerformance = [
     { time: "6AM", openRate: 65, clickRate: 35 },
     { time: "9AM", openRate: 85, clickRate: 55 },
@@ -108,17 +125,21 @@ export function NudgePerformance() {
   ];
 
   // A/B Test Results
-  const abTestResults = [
+  const abTestResults = useMemo(() => [
     {
       campaign: "Morning Mood Check-in",
       variantA: { name: "Original", sent: 4320, opened: 3456, clicked: 2160 },
       variantB: { name: "Emoji Version", sent: 4320, opened: 3802, clicked: 2592 },
       winner: "B",
     },
-  ];
+  ].map(t => ({
+    ...t,
+    variantA: { ...t.variantA, sent: Math.round(t.variantA.sent * rangeFactor), opened: Math.round(t.variantA.opened * rangeFactor), clicked: Math.round(t.variantA.clicked * rangeFactor) },
+    variantB: { ...t.variantB, sent: Math.round(t.variantB.sent * rangeFactor), opened: Math.round(t.variantB.opened * rangeFactor), clicked: Math.round(t.variantB.clicked * rangeFactor) },
+  })), [rangeFactor]);
 
   // Top Performing Templates
-  const topTemplates = [
+  const topTemplates = useMemo(() => [
     {
       id: "1",
       name: "Session Completion Celebration",
@@ -151,42 +172,53 @@ export function NudgePerformance() {
       clickRate: 80,
       conversionRate: 70,
     },
-  ];
+  ].map(t => ({ ...t, sent: Math.round(t.sent * rangeFactor) })), [rangeFactor]);
 
-  const stats = [
-    {
-      label: "Total Sent",
-      value: "67,920",
-      change: "+18.5%",
-      trend: "up" as const,
-      icon: Bell,
-      color: "from-blue-500 to-cyan-600",
-    },
-    {
-      label: "Avg Open Rate",
-      value: "80.2%",
-      change: "+5.3%",
-      trend: "up" as const,
-      icon: Eye,
-      color: "from-green-500 to-emerald-600",
-    },
-    {
-      label: "Avg Click Rate",
-      value: "51.8%",
-      change: "+3.7%",
-      trend: "up" as const,
-      icon: MousePointer,
-      color: "from-orange-500 to-amber-600",
-    },
-    {
-      label: "Conversion Rate",
-      value: "42.1%",
-      change: "+2.4%",
-      trend: "up" as const,
-      icon: Target,
-      color: "from-purple-500 to-pink-600",
-    },
-  ];
+  const stats = useMemo(() => {
+    const totalSent = performanceTrend.reduce((acc, curr) => acc + curr.sent, 0);
+    const totalOpened = performanceTrend.reduce((acc, curr) => acc + curr.opened, 0);
+    const totalClicked = performanceTrend.reduce((acc, curr) => acc + curr.clicked, 0);
+    const totalConverted = performanceTrend.reduce((acc, curr) => acc + curr.converted, 0);
+
+    const avgOpenRate = totalSent > 0 ? (totalOpened / totalSent) * 100 : 0;
+    const avgClickRate = totalOpened > 0 ? (totalClicked / totalOpened) * 100 : 0;
+    const avgConversionRate = totalClicked > 0 ? (totalConverted / totalClicked) * 100 : 0;
+
+    return [
+      {
+        label: "Total Sent",
+        value: totalSent.toLocaleString(),
+        change: "+18.5%",
+        trend: "up" as const,
+        icon: Bell,
+        color: "from-blue-500 to-cyan-600",
+      },
+      {
+        label: "Avg Open Rate",
+        value: `${avgOpenRate.toFixed(1)}%`,
+        change: "+5.3%",
+        trend: "up" as const,
+        icon: Eye,
+        color: "from-green-500 to-emerald-600",
+      },
+      {
+        label: "Avg Click Rate",
+        value: `${avgClickRate.toFixed(1)}%`,
+        change: "+3.7%",
+        trend: "up" as const,
+        icon: MousePointer,
+        color: "from-orange-500 to-amber-600",
+      },
+      {
+        label: "Conversion Rate",
+        value: `${avgConversionRate.toFixed(1)}%`,
+        change: "+2.4%",
+        trend: "up" as const,
+        icon: Target,
+        color: "from-purple-500 to-pink-600",
+      },
+    ];
+  }, [performanceTrend]);
 
   return (
     <AdminLayoutNew>

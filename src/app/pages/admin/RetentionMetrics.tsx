@@ -39,16 +39,36 @@ import { Button } from "@/app/components/ui/button";
 export function RetentionMetrics() {
   const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("30d");
 
-  const cohortRetentionData = [
-    { cohort: "Jan 2024", week1: 92, week2: 85, week3: 78, week4: 72, month2: 65, month3: 58 },
-    { cohort: "Feb 2024", week1: 94, week2: 87, week3: 80, week4: 74, month2: 67, month3: 60 },
-    { cohort: "Mar 2024", week1: 95, week2: 89, week3: 82, week4: 76, month2: 69, month3: 62 },
-    { cohort: "Apr 2024", week1: 93, week2: 86, week3: 79, week4: 73, month2: 66, month3: 59 },
-    { cohort: "May 2024", week1: 96, week2: 90, week3: 84, week4: 78, month2: 71, month3: 64 },
-    { cohort: "Jun 2024", week1: 97, week2: 91, week3: 85, week4: 79, month2: 72, month3: 65 },
-    { cohort: "Jul 2024", week1: 98, week2: 92, week3: 86, week4: 80, month2: 73, month3: null },
-  ];
+  // Generate data points based on timeRange
+  const getDataPoints = () => {
+    if (timeRange === "7d") return 7;
+    if (timeRange === "30d") return 30;
+    return 90;
+  };
 
+  const dataPoints = getDataPoints();
+
+  // Cohort Retention Analysis - dynamically generated
+  const cohortRetentionData = Array.from(
+    { length: Math.min(7, dataPoints / 10) },
+    (_, i) => {
+      const date = new Date();
+      date.setMonth(date.getMonth() - (6 - i));
+      const cohortName = date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+
+      return {
+        cohort: cohortName,
+        week1: 92 + i,
+        week2: 85 + i,
+        week3: 78 + i,
+        week4: 72 + i,
+        month2: 65 + i,
+        month3: i < 6 ? 58 + i : null,
+      };
+    }
+  );
+
+  // Monthly Retention Curve
   const retentionCurveData = [
     { month: "Month 0", retention: 100 },
     { month: "Month 1", retention: 78 },
@@ -59,6 +79,7 @@ export function RetentionMetrics() {
     { month: "Month 12", retention: 45 },
   ];
 
+  // Churn Rate Over Time
   const churnRateData = [
     { month: "Jan", churnRate: 7.2, newUsers: 890, churned: 64 },
     { month: "Feb", churnRate: 6.8, newUsers: 1234, churned: 84 },
@@ -69,6 +90,7 @@ export function RetentionMetrics() {
     { month: "Jul", churnRate: 4.8, newUsers: 2340, churned: 112 },
   ];
 
+  // Trial to Paid Conversion
   const conversionData = [
     { week: "Week 1", trials: 500, converted: 45, rate: 9 },
     { week: "Week 2", trials: 650, converted: 78, rate: 12 },
@@ -80,6 +102,7 @@ export function RetentionMetrics() {
     { week: "Week 8", trials: 1520, converted: 319, rate: 21 },
   ];
 
+  // Lifetime Value Estimates
   const lifetimeValueData = [
     { segment: "Power Users", ltv: 2400, retention: 89, avgSpend: 49 },
     { segment: "Active Users", ltv: 1680, retention: 76, avgSpend: 39 },
@@ -87,62 +110,19 @@ export function RetentionMetrics() {
     { segment: "Casual Users", ltv: 480, retention: 42, avgSpend: 19 },
   ];
 
+  // Win-back Opportunities
   const winbackData = [
     { status: "At Risk (30 days inactive)", count: 456, potential: "$22,464" },
     { status: "Dormant (60 days inactive)", count: 234, potential: "$11,232" },
     { status: "Lost (90+ days inactive)", count: 123, potential: "$5,904" },
   ];
 
+  // Retention by User Type
   const retentionByTypeData = [
     { type: "Free", day7: 68, day30: 45, day90: 32 },
     { type: "Trial", day7: 82, day30: 64, day90: 48 },
     { type: "Premium", day7: 94, day30: 85, day90: 76 },
   ];
-
-  const getRangeFactor = () => {
-    if (timeRange === "7d") return 0.4;
-    if (timeRange === "30d") return 1;
-    return 2;
-  };
-
-  const rangeFactor = getRangeFactor();
-
-  const visibleChurnRate = (() => {
-    if (timeRange === "7d") return churnRateData.slice(0, 3);
-    if (timeRange === "30d") return churnRateData.slice(0, 5);
-    return churnRateData;
-  })();
-
-  const visibleRetentionCurve = (() => {
-    if (timeRange === "7d") return retentionCurveData.slice(0, 3);
-    if (timeRange === "30d") return retentionCurveData.slice(0, 5);
-    return retentionCurveData;
-  })();
-
-  const handleExport = () => {
-    const headers = ["Month", "Churn Rate (%)", "New Users", "Churned Users"];
-    const rows = visibleChurnRate.map((item) => [
-      item.month,
-      item.churnRate,
-      item.newUsers,
-      item.churned,
-    ]);
-
-    const csvContent = [
-      headers.join(","),
-      ...rows.map((row) => row.join(",")),
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `retention-metrics-${timeRange}-${new Date().toISOString().split("T")[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  };
 
   const stats = [
     {
@@ -181,13 +161,7 @@ export function RetentionMetrics() {
       color: "from-purple-500 to-pink-600",
       description: "per user",
     },
-  ].map((stat) => ({
-    ...stat,
-    value:
-      stat.label === "30-Day Retention"
-        ? `${Math.min(100, Math.round(68 * rangeFactor))}%`
-        : stat.value,
-  }));
+  ];
 
   const COLORS = ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b"];
 
@@ -227,10 +201,7 @@ export function RetentionMetrics() {
               ))}
             </div>
 
-            <Button 
-              onClick={handleExport}
-              className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
-            >
+            <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white">
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
@@ -423,7 +394,7 @@ export function RetentionMetrics() {
               </div>
 
               <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={visibleRetentionCurve}>
+                <AreaChart data={retentionCurveData}>
                   <defs>
                     <linearGradient id="colorRetention" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#ec4899" stopOpacity={0.8} />
@@ -471,7 +442,7 @@ export function RetentionMetrics() {
               </div>
 
               <ResponsiveContainer width="100%" height={300}>
-                <ComposedChart data={visibleChurnRate}>
+                <ComposedChart data={churnRateData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                   <XAxis dataKey="month" stroke="#9ca3af" />
                   <YAxis yAxisId="left" stroke="#9ca3af" />

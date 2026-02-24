@@ -48,7 +48,7 @@ export function UserSegmentation() {
   const [viewingSegment, setViewingSegment] = useState<Segment | null>(null);
 
   // Mock segments
-  const segments: Segment[] = [
+  const [segments, setSegments] = useState<Segment[]>([
     {
       id: "seg001",
       name: "Highly Engaged Users",
@@ -141,7 +141,22 @@ export function UserSegmentation() {
       createdAt: new Date("2024-06-12"),
       color: "#ec4899"
     }
-  ];
+  ]);
+
+  const [newSegment, setNewSegment] = useState({
+    name: "",
+    description: "",
+    criteria: [{ type: "Total Sessions", operator: ">=", value: "" }],
+    color: "#3b82f6"
+  });
+
+  const [editForm, setEditForm] = useState({
+    id: "",
+    name: "",
+    description: "",
+    criteria: [] as { type: string; operator: string; value: string }[],
+    color: ""
+  });
 
   // Engagement distribution
   const engagementData = [
@@ -164,6 +179,79 @@ export function UserSegmentation() {
     totalSegments: segments.length,
     avgEngagement: 67,
     highValueUsers: segments.find(s => s.name === "Premium Subscribers")?.userCount || 0
+  };
+
+  const handleCreateSegment = () => {
+    if (!newSegment.name || !newSegment.description) return;
+    
+    const segment: Segment = {
+      id: `seg${Date.now()}`,
+      name: newSegment.name,
+      description: newSegment.description,
+      userCount: 0,
+      criteria: newSegment.criteria,
+      engagement: 0,
+      conversionRate: 0,
+      avgSessionLength: 0,
+      createdAt: new Date(),
+      color: newSegment.color
+    };
+
+    setSegments([...segments, segment]);
+    setShowCreateModal(false);
+    setNewSegment({
+      name: "",
+      description: "",
+      criteria: [{ type: "Total Sessions", operator: ">=", value: "" }],
+      color: "#3b82f6"
+    });
+  };
+
+  const handleUpdateSegment = () => {
+    if (!editForm.name || !editForm.description) return;
+
+    setSegments(segments.map(s => s.id === editForm.id ? {
+      ...s,
+      name: editForm.name,
+      description: editForm.description,
+      criteria: editForm.criteria,
+      color: editForm.color
+    } : s));
+
+    setShowEditModal(false);
+  };
+
+  const addCriteria = (isEdit = false) => {
+    const newCriterion = { type: "Total Sessions", operator: ">=", value: "" };
+    if (isEdit) {
+      setEditForm({ ...editForm, criteria: [...editForm.criteria, newCriterion] });
+    } else {
+      setNewSegment({ ...newSegment, criteria: [...newSegment.criteria, newCriterion] });
+    }
+  };
+
+  const removeCriteria = (index: number, isEdit = false) => {
+    if (isEdit) {
+      const updated = [...editForm.criteria];
+      updated.splice(index, 1);
+      setEditForm({ ...editForm, criteria: updated });
+    } else {
+      const updated = [...newSegment.criteria];
+      updated.splice(index, 1);
+      setNewSegment({ ...newSegment, criteria: updated });
+    }
+  };
+
+  const updateCriteria = (index: number, field: string, value: string, isEdit = false) => {
+    if (isEdit) {
+      const updated = [...editForm.criteria];
+      updated[index] = { ...updated[index], [field]: value };
+      setEditForm({ ...editForm, criteria: updated });
+    } else {
+      const updated = [...newSegment.criteria];
+      updated[index] = { ...updated[index], [field]: value };
+      setNewSegment({ ...newSegment, criteria: updated });
+    }
   };
 
   return (
@@ -444,6 +532,13 @@ export function UserSegmentation() {
                         className="px-3 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium"
                         onClick={() => {
                           setViewingSegment(segment);
+                          setEditForm({
+                            id: segment.id,
+                            name: segment.name,
+                            description: segment.description,
+                            criteria: segment.criteria,
+                            color: segment.color
+                          });
                           setShowEditModal(true);
                         }}
                       >
@@ -500,6 +595,8 @@ export function UserSegmentation() {
                   <input
                     type="text"
                     placeholder="e.g., Weekend Warriors"
+                    value={newSegment.name}
+                    onChange={(e) => setNewSegment({ ...newSegment, name: e.target.value })}
                     className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
@@ -509,6 +606,8 @@ export function UserSegmentation() {
                   <textarea
                     placeholder="Describe this user segment..."
                     rows={3}
+                    value={newSegment.description}
+                    onChange={(e) => setNewSegment({ ...newSegment, description: e.target.value })}
                     className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
@@ -517,36 +616,54 @@ export function UserSegmentation() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Filter Criteria</label>
                   
                   <div className="space-y-3">
-                    <div className="flex gap-2">
-                      <select className="flex-1 px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option>Total Sessions</option>
-                        <option>Last Active</option>
-                        <option>Subscription Status</option>
-                        <option>Account Age</option>
-                        <option>Mood Tracking Frequency</option>
-                        <option>Journal Entries (30d)</option>
-                      </select>
+                    {newSegment.criteria.map((criterion, index) => (
+                      <div key={index} className="flex gap-2">
+                        <select 
+                          value={criterion.type}
+                          onChange={(e) => updateCriteria(index, "type", e.target.value)}
+                          className="flex-1 px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                        >
+                          <option>Total Sessions</option>
+                          <option>Last Active</option>
+                          <option>Subscription Status</option>
+                          <option>Account Age</option>
+                          <option>Mood Tracking Frequency</option>
+                          <option>Journal Entries (30d)</option>
+                        </select>
 
-                      <select className="w-32 px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option>=</option>
-                        <option>≠</option>
-                        <option>&gt;</option>
-                        <option>&gt;=</option>
-                        <option>&lt;</option>
-                        <option>&lt;=</option>
-                        <option>in</option>
-                      </select>
+                        <select 
+                          value={criterion.operator}
+                          onChange={(e) => updateCriteria(index, "operator", e.target.value)}
+                          className="w-32 px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                        >
+                          <option>=</option>
+                          <option>≠</option>
+                          <option>&gt;</option>
+                          <option>&gt;=</option>
+                          <option>&lt;</option>
+                          <option>&lt;=</option>
+                          <option>in</option>
+                        </select>
 
-                      <input
-                        type="text"
-                        placeholder="Value"
-                        className="flex-1 px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
-                      />
-                    </div>
+                        <input
+                          type="text"
+                          placeholder="Value"
+                          value={criterion.value}
+                          onChange={(e) => updateCriteria(index, "value", e.target.value)}
+                          className="flex-1 px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                        {index > 0 && (
+                          <button onClick={() => removeCriteria(index)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
 
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      onClick={() => addCriteria(false)}
                       className="w-full px-4 py-2 rounded-xl border-2 border-dashed border-gray-300 text-gray-600 hover:border-blue-500 hover:text-blue-600 flex items-center justify-center gap-2"
                     >
                       <Plus className="w-4 h-4" />
@@ -561,7 +678,8 @@ export function UserSegmentation() {
                     {["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"].map(color => (
                       <button
                         key={color}
-                        className="w-10 h-10 rounded-lg border-2 border-gray-200 hover:border-gray-400"
+                        onClick={() => setNewSegment({ ...newSegment, color })}
+                        className={`w-10 h-10 rounded-lg border-2 transition ${newSegment.color === color ? 'border-black scale-110' : 'border-gray-200 hover:border-gray-400'}`}
                         style={{ backgroundColor: color }}
                       />
                     ))}
@@ -582,8 +700,13 @@ export function UserSegmentation() {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowCreateModal(false)}
-                  className="flex-1 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium"
+                  disabled={!newSegment.name || !newSegment.description}
+                  onClick={handleCreateSegment}
+                  className={`flex-1 px-4 py-2 rounded-xl font-medium transition-colors ${
+                    !newSegment.name || !newSegment.description
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:shadow-lg"
+                  }`}
                 >
                   Create Segment
                 </motion.button>
@@ -772,6 +895,8 @@ export function UserSegmentation() {
                   <input
                     type="text"
                     placeholder="e.g., Weekend Warriors"
+                    value={editForm.name}
+                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                     className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
@@ -781,6 +906,8 @@ export function UserSegmentation() {
                   <textarea
                     placeholder="Describe this user segment..."
                     rows={3}
+                    value={editForm.description}
+                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                     className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
@@ -789,36 +916,54 @@ export function UserSegmentation() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Filter Criteria</label>
                   
                   <div className="space-y-3">
-                    <div className="flex gap-2">
-                      <select className="flex-1 px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option>Total Sessions</option>
-                        <option>Last Active</option>
-                        <option>Subscription Status</option>
-                        <option>Account Age</option>
-                        <option>Mood Tracking Frequency</option>
-                        <option>Journal Entries (30d)</option>
-                      </select>
+                    {editForm.criteria.map((criterion, index) => (
+                      <div key={index} className="flex gap-2">
+                        <select 
+                          value={criterion.type}
+                          onChange={(e) => updateCriteria(index, "type", e.target.value, true)}
+                          className="flex-1 px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                        >
+                          <option>Total Sessions</option>
+                          <option>Last Active</option>
+                          <option>Subscription Status</option>
+                          <option>Account Age</option>
+                          <option>Mood Tracking Frequency</option>
+                          <option>Journal Entries (30d)</option>
+                        </select>
 
-                      <select className="w-32 px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option>=</option>
-                        <option>≠</option>
-                        <option>&gt;</option>
-                        <option>&gt;=</option>
-                        <option>&lt;</option>
-                        <option>&lt;=</option>
-                        <option>in</option>
-                      </select>
+                        <select 
+                          value={criterion.operator}
+                          onChange={(e) => updateCriteria(index, "operator", e.target.value, true)}
+                          className="w-32 px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                        >
+                          <option>=</option>
+                          <option>≠</option>
+                          <option>&gt;</option>
+                          <option>&gt;=</option>
+                          <option>&lt;</option>
+                          <option>&lt;=</option>
+                          <option>in</option>
+                        </select>
 
-                      <input
-                        type="text"
-                        placeholder="Value"
-                        className="flex-1 px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
-                      />
-                    </div>
+                        <input
+                          type="text"
+                          placeholder="Value"
+                          value={criterion.value}
+                          onChange={(e) => updateCriteria(index, "value", e.target.value, true)}
+                          className="flex-1 px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                        {index > 0 && (
+                          <button onClick={() => removeCriteria(index, true)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
 
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      onClick={() => addCriteria(true)}
                       className="w-full px-4 py-2 rounded-xl border-2 border-dashed border-gray-300 text-gray-600 hover:border-blue-500 hover:text-blue-600 flex items-center justify-center gap-2"
                     >
                       <Plus className="w-4 h-4" />
@@ -833,7 +978,8 @@ export function UserSegmentation() {
                     {["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"].map(color => (
                       <button
                         key={color}
-                        className="w-10 h-10 rounded-lg border-2 border-gray-200 hover:border-gray-400"
+                        onClick={() => setEditForm({ ...editForm, color })}
+                        className={`w-10 h-10 rounded-lg border-2 transition ${editForm.color === color ? 'border-black scale-110' : 'border-gray-200 hover:border-gray-400'}`}
                         style={{ backgroundColor: color }}
                       />
                     ))}
@@ -854,7 +1000,7 @@ export function UserSegmentation() {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowEditModal(false)}
+                  onClick={handleUpdateSegment}
                   className="flex-1 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium"
                 >
                   Update Segment

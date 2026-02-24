@@ -166,8 +166,24 @@ export function OnboardingAnalytics() {
   }));
 
   const visibleCompletionTrend = (() => {
-    if (timeRange === "7d") return completionTrend.slice(-7);
-    return completionTrend;
+    // Generate dynamic trend data based on time range
+    const days = timeRange === "7d" ? 7 : timeRange === "14d" ? 14 : timeRange === "30d" ? 30 : 90;
+    const data = [];
+    const now = new Date();
+    
+    for (let i = 0; i < days; i++) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - (days - 1 - i));
+      const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      
+      // Generate somewhat random rate that trends upwards slightly
+      const baseRate = 60 + (i / days) * 15;
+      const randomVar = Math.random() * 10 - 5;
+      const rate = Math.min(100, Math.max(0, Math.round(baseRate + randomVar)));
+      
+      data.push({ date: dateStr, rate });
+    }
+    return data;
   })();
 
   // Drop-off by step
@@ -212,16 +228,21 @@ export function OnboardingAnalytics() {
             <p className="text-gray-600 mt-1">Track user journey through onboarding funnel</p>
           </div>
 
-          <select
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className="px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none bg-white"
-          >
-            <option value="7d">Last 7 days</option>
-            <option value="14d">Last 14 days</option>
-            <option value="30d">Last 30 days</option>
-            <option value="90d">Last 90 days</option>
-          </select>
+          <div className="flex items-center gap-2 bg-gray-100 rounded-xl p-1 border border-gray-200">
+            {(["7d", "14d", "30d", "90d"] as const).map((range) => (
+              <button
+                key={range}
+                onClick={() => setTimeRange(range)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  timeRange === range
+                    ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg"
+                    : "text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {range === "7d" ? "7 Days" : range === "14d" ? "14 Days" : range === "30d" ? "30 Days" : "90 Days"}
+              </button>
+            ))}
+          </div>
         </motion.div>
 
         {/* Stats */}

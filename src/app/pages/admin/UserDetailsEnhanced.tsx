@@ -8,6 +8,7 @@ import { Link } from "react-router";
 
 export function UserDetailsEnhanced() {
   const [showActionMenu, setShowActionMenu] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTab, setSelectedTab] = useState<"overview" | "activity" | "sessions" | "security">("overview");
 
   const user = {
@@ -215,11 +216,11 @@ export function UserDetailsEnhanced() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2" onClick={() => window.location.href = `mailto:${user.email}`}>
                 <Mail className="w-4 h-4" />
                 Email
               </Button>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2" onClick={() => setShowEditModal(true)}>
                 <Edit className="w-4 h-4" />
                 Edit
               </Button>
@@ -625,6 +626,90 @@ export function UserDetailsEnhanced() {
                   </div>
                 </div>
               </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Edit User Modal */}
+        <AnimatePresence>
+          {showEditModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setShowEditModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden"
+              >
+                <div className="p-6 border-b">
+                  <h2 className="text-xl font-bold">Edit User Details</h2>
+                  <p className="text-sm text-muted-foreground">Update information for {user.name}</p>
+                </div>
+                <div className="p-6 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Full Name</label>
+                      <input
+                        type="text"
+                        defaultValue={user.name}
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Status</label>
+                      <select
+                        defaultValue={user.status}
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      >
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="suspended">Suspended</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Email Address</label>
+                    <input
+                      type="email"
+                      defaultValue={user.email}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Organization</label>
+                    <input
+                      type="text"
+                      defaultValue={user.organization}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Risk Level</label>
+                    <select
+                      defaultValue={user.riskLevel}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    >
+                      <option value="low">Low Risk</option>
+                      <option value="medium">Medium Risk</option>
+                      <option value="high">High Risk</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="p-6 border-t bg-gray-50 flex justify-end gap-3">
+                  <Button variant="ghost" onClick={() => setShowEditModal(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={() => setShowEditModal(false)}>
+                    Save Changes
+                  </Button>
+                </div>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>

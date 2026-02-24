@@ -35,40 +35,51 @@ import {
   ComposedChart,
   Area,
 } from "recharts";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 
 export function EngagementMetrics() {
   const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("30d");
 
-  const engagementTrendData = [
-    { date: "Week 1", score: 72, sessions: 2890, journalEntries: 456 },
-    { date: "Week 2", score: 75, sessions: 3120, journalEntries: 523 },
-    { date: "Week 3", score: 78, sessions: 3350, journalEntries: 598 },
-    { date: "Week 4", score: 82, sessions: 3680, journalEntries: 645 },
-    { date: "Week 5", score: 85, sessions: 3990, journalEntries: 712 },
-    { date: "Week 6", score: 83, sessions: 3850, journalEntries: 689 },
-    { date: "Week 7", score: 87, sessions: 4180, journalEntries: 756 },
-    { date: "Week 8", score: 89, sessions: 4420, journalEntries: 823 },
-  ];
+  // Generate weeks based on time range
+  const getWeeks = () => {
+    if (timeRange === "7d") return 7; // Changed to days for 7d view
+    if (timeRange === "30d") return 4;
+    return 13; // 90 days = approximately 13 weeks
+  };
 
-  const sessionFrequencyData = [
+  const weeks = getWeeks();
+
+  // Engagement Score Trend - dynamically generated based on timeRange
+  const engagementTrendData = useMemo(() => Array.from({ length: weeks }, (_, i) => ({
+    date: timeRange === "7d" ? `Day ${i + 1}` : `Week ${i + 1}`,
+    score: Math.min(100, 72 + i * 2 + Math.floor(Math.random() * 5)),
+    sessions: 2890 + i * 150 + Math.floor(Math.random() * 200),
+    journalEntries: 456 + i * 40 + Math.floor(Math.random() * 50),
+  })), [weeks, timeRange]);
+
+  const rangeFactor = timeRange === "7d" ? 1 : timeRange === "30d" ? 3.5 : 10;
+
+  // Session Frequency Analysis
+  const sessionFrequencyData = useMemo(() => [
     { range: "1-2 times/week", users: 890, percentage: 18 },
     { range: "3-4 times/week", users: 1456, percentage: 29 },
     { range: "5-6 times/week", users: 1823, percentage: 37 },
     { range: "Daily (7+)", users: 812, percentage: 16 },
-  ];
+  ].map(d => ({ ...d, users: Math.round(d.users * rangeFactor) })), [rangeFactor]);
 
-  const featureEngagementData = [
+  // Feature Engagement
+  const featureEngagementData = useMemo(() => [
     { feature: "AI Sessions", usage: 95, satisfaction: 4.8 },
     { feature: "Mood Tracking", usage: 89, satisfaction: 4.6 },
     { feature: "Journaling", usage: 72, satisfaction: 4.7 },
     { feature: "Wellness Tools", usage: 68, satisfaction: 4.5 },
     { feature: "Progress Reports", usage: 54, satisfaction: 4.3 },
     { feature: "Community", usage: 42, satisfaction: 4.2 },
-  ];
+  ].map(d => ({ ...d, usage: Math.min(100, Math.round(d.usage * (1 + (Math.random() * 0.1 - 0.05)))) })), [timeRange]); // Vary slightly
 
+  // User Journey Engagement
   const userJourneyData = [
     { stage: "Onboarding", completion: 92, dropoff: 8 },
     { stage: "First Session", completion: 87, dropoff: 5 },
@@ -79,6 +90,7 @@ export function EngagementMetrics() {
     { stage: "Month 3+", completion: 53, dropoff: 5 },
   ];
 
+  // Return Rate Data
   const returnRateData = [
     { day: "Day 1", rate: 95 },
     { day: "Day 2", rate: 88 },
@@ -90,124 +102,58 @@ export function EngagementMetrics() {
     { day: "Day 90", rate: 49 },
   ];
 
-  const timeOfDayEngagement = [
+  // Engagement by Time of Day
+  const timeOfDayEngagement = useMemo(() => [
     { time: "Morning (6-12)", engagement: 78, sessions: 1234 },
     { time: "Afternoon (12-6)", engagement: 85, sessions: 1890 },
     { time: "Evening (6-10)", engagement: 92, sessions: 2456 },
     { time: "Night (10-6)", engagement: 62, sessions: 567 },
-  ];
+  ].map(d => ({ ...d, sessions: Math.round(d.sessions * rangeFactor) })), [rangeFactor]);
 
-  const getRangeFactor = () => {
-    if (timeRange === "7d") return 0.4;
-    if (timeRange === "30d") return 1;
-    return 2;
-  };
-
-  const rangeFactor = getRangeFactor();
-
-  const visibleEngagementTrend = (() => {
-    if (timeRange === "7d") return engagementTrendData.slice(-2);
-    if (timeRange === "30d") return engagementTrendData.slice(-4);
-    return engagementTrendData;
-  })();
-
-  const visibleReturnRate = (() => {
-    if (timeRange === "7d") return returnRateData.slice(0, 4);
-    if (timeRange === "30d") return returnRateData.slice(0, 6);
-    return returnRateData;
-  })();
-
-  const visibleSessionFrequency = sessionFrequencyData.map(item => ({
-    ...item,
-    users: Math.round(item.users * rangeFactor),
-  }));
-
-  const visibleFeatureEngagement = featureEngagementData.map(item => ({
-    ...item,
-    usage: Math.min(100, Math.round(item.usage * (rangeFactor > 1 ? 1.1 : rangeFactor < 1 ? 0.9 : 1))),
-  }));
-
-  const visibleUserJourney = userJourneyData.map(item => ({
-    ...item,
-    completion: Math.min(100, Math.round(item.completion * (rangeFactor > 1 ? 0.95 : rangeFactor < 1 ? 1.05 : 1))),
-    dropoff: Math.max(0, Math.round(item.dropoff * (rangeFactor > 1 ? 1.1 : rangeFactor < 1 ? 0.9 : 1)))
-  }));
-
-  const visibleTimeOfDay = timeOfDayEngagement.map(item => ({
-    ...item,
-    engagement: Math.min(100, Math.round(item.engagement * (rangeFactor > 1 ? 0.95 : rangeFactor < 1 ? 1.05 : 1))),
-    sessions: Math.round(item.sessions * rangeFactor)
-  }));
-
-  const handleExport = () => {
-    const headers = ["Date", "Score", "Sessions", "Journal Entries"];
-    const rows = visibleEngagementTrend.map((item) => [
-      item.date,
-      item.score,
-      item.sessions,
-      item.journalEntries,
-    ]);
-
-    const csvContent = [
-      headers.join(","),
-      ...rows.map((row) => row.join(",")),
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `engagement-metrics-${timeRange}-${new Date().toISOString().split("T")[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  };
-
-  const stats = [
-    {
-      label: "Overall Engagement Score",
-      value: "89%",
-      change: "+2.3%",
-      trend: "up" as const,
-      icon: Heart,
-      color: "from-pink-500 to-rose-600",
-      description: "vs last period",
-    },
-    {
-      label: "Avg Session Frequency",
-      value: "4.8x/week",
-      change: "+0.5x",
-      trend: "up" as const,
-      icon: Activity,
-      color: "from-purple-500 to-indigo-600",
-      description: "per user",
-    },
-    {
-      label: "Feature Adoption Rate",
-      value: "76%",
-      change: "+4.2%",
-      trend: "up" as const,
-      icon: Zap,
-      color: "from-cyan-500 to-blue-600",
-      description: "of all features",
-    },
-    {
-      label: "7-Day Return Rate",
-      value: "76%",
-      change: "-1.8%",
-      trend: "down" as const,
-      icon: Target,
-      color: "from-orange-500 to-red-600",
-      description: "users returning",
-    },
-  ].map((stat) => ({
-    ...stat,
-    value:
-      stat.label === "Overall Engagement Score"
-        ? `${Math.min(100, Math.round(89 * rangeFactor))}%`
-        : stat.value,
-  }));
+  const stats = useMemo(() => {
+    const avgScore = Math.round(engagementTrendData.reduce((acc, curr) => acc + curr.score, 0) / weeks);
+    const avgFrequency = (sessionFrequencyData.reduce((acc, curr) => acc + (curr.users * (curr.range.includes("1-2") ? 1.5 : curr.range.includes("3-4") ? 3.5 : curr.range.includes("5-6") ? 5.5 : 7)), 0) / sessionFrequencyData.reduce((acc, curr) => acc + curr.users, 0)).toFixed(1);
+    const avgAdoption = Math.round(featureEngagementData.reduce((acc, curr) => acc + curr.usage, 0) / featureEngagementData.length);
+    
+    return [
+      {
+        label: "Overall Engagement Score",
+        value: `${avgScore}%`,
+        change: "+2.3%",
+        trend: "up" as const,
+        icon: Heart,
+        color: "from-pink-500 to-rose-600",
+        description: "vs last period",
+      },
+      {
+        label: "Avg Session Frequency",
+        value: `${avgFrequency}x/week`,
+        change: "+0.5x",
+        trend: "up" as const,
+        icon: Activity,
+        color: "from-purple-500 to-indigo-600",
+        description: "per user",
+      },
+      {
+        label: "Feature Adoption Rate",
+        value: `${avgAdoption}%`,
+        change: "+4.2%",
+        trend: "up" as const,
+        icon: Zap,
+        color: "from-cyan-500 to-blue-600",
+        description: "of all features",
+      },
+      {
+        label: "7-Day Return Rate",
+        value: "76%",
+        change: "-1.8%",
+        trend: "down" as const,
+        icon: Target,
+        color: "from-orange-500 to-red-600",
+        description: "users returning",
+      },
+    ];
+  }, [engagementTrendData, sessionFrequencyData, featureEngagementData, weeks]);
 
   return (
     <AdminLayoutNew>
@@ -245,10 +191,7 @@ export function EngagementMetrics() {
               ))}
             </div>
 
-            <Button 
-              onClick={handleExport}
-              className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
-            >
+            <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white">
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
@@ -321,7 +264,7 @@ export function EngagementMetrics() {
             </div>
 
             <ResponsiveContainer width="100%" height={350}>
-              <ComposedChart data={visibleEngagementTrend}>
+              <ComposedChart data={engagementTrendData}>
                 <defs>
                   <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#ec4899" stopOpacity={0.8} />
@@ -391,7 +334,7 @@ export function EngagementMetrics() {
               </div>
 
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={visibleSessionFrequency} layout="vertical">
+                <BarChart data={sessionFrequencyData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                   <XAxis type="number" stroke="#9ca3af" />
                   <YAxis dataKey="range" type="category" stroke="#9ca3af" width={120} />
@@ -404,7 +347,7 @@ export function EngagementMetrics() {
                     }}
                   />
                   <Bar dataKey="users" fill="#8b5cf6" radius={[0, 8, 8, 0]}>
-                    {visibleSessionFrequency.map((entry, index) => (
+                    {sessionFrequencyData.map((entry, index) => (
                       <text
                         key={index}
                         x={entry.users + 50}
@@ -439,7 +382,7 @@ export function EngagementMetrics() {
               </div>
 
               <div className="space-y-4">
-                {visibleFeatureEngagement.map((feature, index) => (
+                {featureEngagementData.map((feature, index) => (
                   <div key={feature.feature} className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-white font-medium">{feature.feature}</span>
@@ -490,7 +433,7 @@ export function EngagementMetrics() {
               </div>
 
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={visibleUserJourney}>
+                <BarChart data={userJourneyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                   <XAxis dataKey="stage" stroke="#9ca3af" angle={-45} textAnchor="end" height={80} />
                   <YAxis stroke="#9ca3af" />
@@ -527,8 +470,8 @@ export function EngagementMetrics() {
                 <Users className="w-5 h-5 text-green-400" />
               </div>
 
-            <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={visibleReturnRate}>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={returnRateData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                   <XAxis dataKey="day" stroke="#9ca3af" />
                   <YAxis stroke="#9ca3af" />
@@ -574,7 +517,7 @@ export function EngagementMetrics() {
             </div>
 
             <ResponsiveContainer width="100%" height={300}>
-              <ComposedChart data={visibleTimeOfDay}>
+              <ComposedChart data={timeOfDayEngagement}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                 <XAxis dataKey="time" stroke="#9ca3af" />
                 <YAxis yAxisId="left" stroke="#9ca3af" />

@@ -38,15 +38,34 @@ import { Card } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 
 export function ContentPerformance() {
-  const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("30d");
+  const [timeRange, setTimeRange] = useState<
+    "7d" | "30d" | "90d"
+  >("30d");
 
-  const performanceData = [
-    { date: "Week 1", views: 12450, likes: 890, shares: 145, completions: 78 },
-    { date: "Week 2", views: 15230, likes: 1120, shares: 189, completions: 82 },
-    { date: "Week 3", views: 18900, likes: 1450, shares: 234, completions: 85 },
-    { date: "Week 4", views: 21340, likes: 1680, shares: 289, completions: 88 },
-  ];
+  // Generate weeks based on time range
+  const getWeeks = () => {
+    if (timeRange === "7d") return 1;
+    if (timeRange === "30d") return 4;
+    return 13; // 90 days = approximately 13 weeks
+  };
 
+  const weeks = getWeeks();
+
+  // Content Performance Overview - dynamically generated
+  const performanceData = Array.from(
+    { length: weeks },
+    (_, i) => ({
+      date:
+        timeRange === "7d" ? `Day ${i + 1}` : `Week ${i + 1}`,
+      views:
+        12000 + i * 1500 + Math.floor(Math.random() * 1000),
+      likes: 850 + i * 100 + Math.floor(Math.random() * 150),
+      shares: 140 + i * 20 + Math.floor(Math.random() * 30),
+      completions: 75 + i * 2 + Math.floor(Math.random() * 5),
+    }),
+  );
+
+  // Top Performing Content
   const topContent = [
     {
       id: "1",
@@ -100,49 +119,76 @@ export function ContentPerformance() {
     },
   ];
 
+  // Content by Type Distribution
   const contentTypeData = [
-    { name: "Articles", value: 35, count: 28, color: "#3b82f6" },
+    {
+      name: "Articles",
+      value: 35,
+      count: 28,
+      color: "#3b82f6",
+    },
     { name: "Tips", value: 30, count: 42, color: "#f59e0b" },
-    { name: "Activities", value: 25, count: 18, color: "#10b981" },
+    {
+      name: "Activities",
+      value: 25,
+      count: 18,
+      color: "#10b981",
+    },
     { name: "Videos", value: 10, count: 8, color: "#ec4899" },
   ];
 
+  // Engagement by Category
   const categoryEngagement = [
-    { category: "Mental Wellness", engagement: 94, views: 18900 },
-    { category: "Physical Wellness", engagement: 87, views: 15600 },
+    {
+      category: "Mental Wellness",
+      engagement: 94,
+      views: 18900,
+    },
+    {
+      category: "Physical Wellness",
+      engagement: 87,
+      views: 15600,
+    },
     { category: "Sleep", engagement: 91, views: 14200 },
     { category: "Meditation", engagement: 89, views: 12800 },
-    { category: "Stress Management", engagement: 85, views: 11500 },
+    {
+      category: "Stress Management",
+      engagement: 85,
+      views: 11500,
+    },
     { category: "Mindfulness", engagement: 82, views: 9800 },
   ];
 
+  // Completion Rates
   const completionRates = [
-    { type: "Articles", started: 5420, completed: 4756, rate: 88 },
-    { type: "Videos", started: 3210, completed: 2889, rate: 90 },
-    { type: "Activities", started: 4680, completed: 3744, rate: 80 },
+    {
+      type: "Articles",
+      started: 5420,
+      completed: 4756,
+      rate: 88,
+    },
+    {
+      type: "Videos",
+      started: 3210,
+      completed: 2889,
+      rate: 90,
+    },
+    {
+      type: "Activities",
+      started: 4680,
+      completed: 3744,
+      rate: 80,
+    },
     { type: "Tips", started: 8900, completed: 8188, rate: 92 },
   ];
 
+  // Trending Content
   const trendingData = [
     { week: "Week 1", trending: 12, views: 8900 },
     { week: "Week 2", trending: 18, views: 12400 },
     { week: "Week 3", trending: 24, views: 15800 },
     { week: "Week 4", trending: 32, views: 19200 },
   ];
-
-  const getRangeFactor = () => {
-    if (timeRange === "7d") return 0.5;
-    if (timeRange === "30d") return 1;
-    return 2;
-  };
-
-  const rangeFactor = getRangeFactor();
-
-  const visiblePerformanceData = (() => {
-    if (timeRange === "7d") return performanceData.slice(-2);
-    if (timeRange === "30d") return performanceData.slice(-3);
-    return performanceData;
-  })();
 
   const stats = [
     {
@@ -177,15 +223,7 @@ export function ContentPerformance() {
       icon: Award,
       color: "from-orange-500 to-amber-600",
     },
-  ].map((stat) => ({
-    ...stat,
-    value:
-      stat.label === "Total Views"
-        ? `${Math.round(67920 * rangeFactor).toLocaleString()}`
-        : stat.label === "Avg Completion"
-        ? `${Math.min(100, Math.round(87.5 * rangeFactor))}%`
-        : stat.value,
-  }));
+  ];
 
   return (
     <AdminLayoutNew>
@@ -201,7 +239,8 @@ export function ContentPerformance() {
               Content Performance
             </h1>
             <p className="text-gray-600">
-              Analytics and engagement metrics for wellness content
+              Analytics and engagement metrics for wellness
+              content
             </p>
           </div>
 
@@ -270,8 +309,12 @@ export function ContentPerformance() {
                     {stat.change}
                   </div>
                 </div>
-                <h3 className="text-3xl font-bold text-gray-900 mb-1">{stat.value}</h3>
-                <p className="text-sm text-gray-600">{stat.label}</p>
+                <h3 className="text-3xl font-bold text-gray-900 mb-1">
+                  {stat.value}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  {stat.label}
+                </p>
               </Card>
             </motion.div>
           ))}
@@ -297,22 +340,67 @@ export function ContentPerformance() {
             </div>
 
             <ResponsiveContainer width="100%" height={350}>
-              <AreaChart data={visiblePerformanceData}>
+              <AreaChart data={performanceData}>
                 <defs>
-                  <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                  <linearGradient
+                    id="colorViews"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="5%"
+                      stopColor="#3b82f6"
+                      stopOpacity={0.8}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="#3b82f6"
+                      stopOpacity={0}
+                    />
                   </linearGradient>
-                  <linearGradient id="colorLikes" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ec4899" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#ec4899" stopOpacity={0} />
+                  <linearGradient
+                    id="colorLikes"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="5%"
+                      stopColor="#ec4899"
+                      stopOpacity={0.8}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="#ec4899"
+                      stopOpacity={0}
+                    />
                   </linearGradient>
-                  <linearGradient id="colorShares" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                  <linearGradient
+                    id="colorShares"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="5%"
+                      stopColor="#10b981"
+                      stopOpacity={0.8}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="#10b981"
+                      stopOpacity={0}
+                    />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#ffffff20"
+                />
                 <XAxis dataKey="date" stroke="#9ca3af" />
                 <YAxis stroke="#9ca3af" />
                 <Tooltip
@@ -367,7 +455,9 @@ export function ContentPerformance() {
                   <h3 className="text-xl font-bold text-gray-900 mb-1">
                     Top Performing Content
                   </h3>
-                  <p className="text-sm text-gray-600">Most popular this month</p>
+                  <p className="text-sm text-gray-600">
+                    Most popular this month
+                  </p>
                 </div>
                 <Award className="w-5 h-5 text-yellow-600" />
               </div>
@@ -384,7 +474,9 @@ export function ContentPerformance() {
                       </span>
                       <div
                         className="w-10 h-10 rounded-lg flex items-center justify-center"
-                        style={{ backgroundColor: `${content.color}20` }}
+                        style={{
+                          backgroundColor: `${content.color}20`,
+                        }}
                       >
                         <content.icon
                           className="w-5 h-5"
@@ -400,7 +492,9 @@ export function ContentPerformance() {
                             <Eye className="w-3 h-3" />
                             {content.views.toLocaleString()}
                           </span>
-                          <span>{content.engagement}% engagement</span>
+                          <span>
+                            {content.engagement}% engagement
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -434,7 +528,9 @@ export function ContentPerformance() {
                   <h3 className="text-xl font-bold text-gray-900 mb-1">
                     Content by Type
                   </h3>
-                  <p className="text-sm text-gray-600">Distribution breakdown</p>
+                  <p className="text-sm text-gray-600">
+                    Distribution breakdown
+                  </p>
                 </div>
                 <FileText className="w-5 h-5 text-blue-600" />
               </div>
@@ -446,13 +542,18 @@ export function ContentPerformance() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, value }) => `${name}: ${value}%`}
+                    label={({ name, value }) =>
+                      `${name}: ${value}%`
+                    }
                     outerRadius={100}
                     fill="#8884d8"
                     dataKey="value"
                   >
                     {contentTypeData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.color}
+                      />
                     ))}
                   </Pie>
                   <Tooltip
@@ -468,7 +569,10 @@ export function ContentPerformance() {
 
               <div className="grid grid-cols-2 gap-3 mt-4">
                 {contentTypeData.map((type) => (
-                  <div key={type.name} className="flex items-center gap-2">
+                  <div
+                    key={type.name}
+                    className="flex items-center gap-2"
+                  >
                     <div
                       className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: type.color }}
@@ -497,16 +601,29 @@ export function ContentPerformance() {
                   <h3 className="text-xl font-bold text-gray-900 mb-1">
                     Engagement by Category
                   </h3>
-                  <p className="text-sm text-gray-600">Category performance</p>
+                  <p className="text-sm text-gray-600">
+                    Category performance
+                  </p>
                 </div>
                 <Target className="w-5 h-5 text-green-600" />
               </div>
 
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={categoryEngagement} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <BarChart
+                  data={categoryEngagement}
+                  layout="vertical"
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#e5e7eb"
+                  />
                   <XAxis type="number" stroke="#6b7280" />
-                  <YAxis dataKey="category" type="category" stroke="#6b7280" width={120} />
+                  <YAxis
+                    dataKey="category"
+                    type="category"
+                    stroke="#6b7280"
+                    width={120}
+                  />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#1f2937",
@@ -515,7 +632,11 @@ export function ContentPerformance() {
                       color: "#fff",
                     }}
                   />
-                  <Bar dataKey="engagement" fill="#10b981" radius={[0, 8, 8, 0]} />
+                  <Bar
+                    dataKey="engagement"
+                    fill="#10b981"
+                    radius={[0, 8, 8, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
@@ -533,7 +654,9 @@ export function ContentPerformance() {
                   <h3 className="text-xl font-bold text-gray-900 mb-1">
                     Completion Rates
                   </h3>
-                  <p className="text-sm text-gray-600">By content type</p>
+                  <p className="text-sm text-gray-600">
+                    By content type
+                  </p>
                 </div>
                 <Clock className="w-5 h-5 text-cyan-600" />
               </div>
@@ -542,10 +665,13 @@ export function ContentPerformance() {
                 {completionRates.map((item, index) => (
                   <div key={item.type} className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-900 font-medium">{item.type}</span>
+                      <span className="text-gray-900 font-medium">
+                        {item.type}
+                      </span>
                       <div className="flex items-center gap-3">
                         <span className="text-sm text-gray-600">
-                          {item.completed.toLocaleString()} / {item.started.toLocaleString()}
+                          {item.completed.toLocaleString()} /{" "}
+                          {item.started.toLocaleString()}
                         </span>
                         <span className="text-lg font-bold text-gray-900">
                           {item.rate}%
@@ -556,7 +682,10 @@ export function ContentPerformance() {
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${item.rate}%` }}
-                        transition={{ duration: 1, delay: index * 0.1 }}
+                        transition={{
+                          duration: 1,
+                          delay: index * 0.1,
+                        }}
                         className="h-full bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full"
                       />
                     </div>
@@ -588,10 +717,17 @@ export function ContentPerformance() {
 
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={trendingData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#e5e7eb"
+                />
                 <XAxis dataKey="week" stroke="#6b7280" />
                 <YAxis yAxisId="left" stroke="#6b7280" />
-                <YAxis yAxisId="right" orientation="right" stroke="#6b7280" />
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  stroke="#6b7280"
+                />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "#1f2937",

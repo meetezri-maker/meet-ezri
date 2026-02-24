@@ -59,7 +59,7 @@ export function CrisisFollowUpQueue() {
   const [callNotes, setCallNotes] = useState("");
   const [completionNotes, setCompletionNotes] = useState("");
 
-  const followUps: FollowUp[] = [
+  const [followUps, setFollowUps] = useState([
     {
       id: 1,
       userId: "user_2847",
@@ -149,7 +149,7 @@ export function CrisisFollowUpQueue() {
       notes: "Follow-up completed. User doing well, continuing regular sessions.",
       riskLevel: "low",
     },
-  ];
+  ] as FollowUp[]);
 
   // Filter follow-ups
   const filteredFollowUps = followUps
@@ -232,6 +232,19 @@ export function CrisisFollowUpQueue() {
         return "text-green-600";
       default:
         return "text-gray-600";
+    }
+  };
+
+  const handleCompleteFollowUp = () => {
+    console.log("Completing follow-up:", selectedFollowUp?.id);
+    if (selectedFollowUp) {
+      setFollowUps(followUps.map(f => 
+        f.id === selectedFollowUp.id 
+          ? { ...f, status: "completed" as const, notes: f.notes + (completionNotes ? `\nCompletion Note: ${completionNotes}` : "") } 
+          : f
+      ));
+      setShowCompleteModal(false);
+      setCompletionNotes("");
     }
   };
 
@@ -817,11 +830,7 @@ export function CrisisFollowUpQueue() {
               <div className="flex gap-3">
                 <Button
                   className="flex-1 bg-green-600 hover:bg-green-700 gap-2"
-                  onClick={() => {
-                    console.log('Follow-up completed:', completionNotes);
-                    setShowCompleteModal(false);
-                    setCompletionNotes("");
-                  }}
+                  onClick={handleCompleteFollowUp}
                 >
                   <CheckCircle className="w-4 h-4" />
                   Mark Complete

@@ -69,7 +69,7 @@ export function TeamRoleManagement() {
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 
-  const teamMembers: TeamMember[] = [
+  const [members, setMembers] = useState<TeamMember[]>([
     {
       id: 1,
       name: "Dr. Emily Chen",
@@ -160,9 +160,9 @@ export function TeamRoleManagement() {
       rating: 0,
       permissions: ["session-access", "user-view"],
     },
-  ];
+  ]);
 
-  const roles: Role[] = [
+  const [rolesList, setRolesList] = useState<Role[]>([
     {
       id: 1,
       name: "System Admin",
@@ -211,9 +211,25 @@ export function TeamRoleManagement() {
       permissions: ["support-access", "user-view", "ticket-management"],
       color: "from-yellow-500 to-orange-500",
     },
-  ];
+  ]);
 
-  const filteredMembers = teamMembers.filter((member) => {
+  const [newMember, setNewMember] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    role: "Therapist",
+    department: "",
+  });
+
+  const [newRole, setNewRole] = useState({
+    name: "",
+    description: "",
+    color: "from-blue-500 to-indigo-500",
+    permissions: [] as string[],
+  });
+
+  const filteredMembers = members.filter((member) => {
     const matchesSearch =
       member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       member.email.toLowerCase().includes(searchQuery.toLowerCase());
@@ -223,10 +239,10 @@ export function TeamRoleManagement() {
   });
 
   const stats = {
-    totalMembers: teamMembers.length,
-    active: teamMembers.filter((m) => m.status === "active").length,
-    pending: teamMembers.filter((m) => m.status === "pending").length,
-    totalRoles: roles.length,
+    totalMembers: members.length,
+    active: members.filter((m) => m.status === "active").length,
+    pending: members.filter((m) => m.status === "pending").length,
+    totalRoles: rolesList.length,
     avgResponseTime: "5.2 min",
     avgRating: 4.7,
   };
@@ -242,6 +258,76 @@ export function TeamRoleManagement() {
       default:
         return "bg-gray-100 text-gray-700";
     }
+  };
+
+  const handleAddMember = () => {
+    if (!newMember.firstName || !newMember.lastName || !newMember.email || !newMember.role) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    const member: TeamMember = {
+      id: members.length + 1,
+      name: `${newMember.firstName} ${newMember.lastName}`,
+      email: newMember.email,
+      phone: newMember.phone || "+1 (555) 000-0000",
+      role: newMember.role,
+      department: newMember.department || "General",
+      status: "pending",
+      joinDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      lastActive: "Just now",
+      sessionsHandled: 0,
+      avgResponseTime: "N/A",
+      rating: 0,
+      permissions: ["user-view"], // Default permission
+    };
+
+    setMembers([...members, member]);
+    setShowCreateMemberModal(false);
+    setNewMember({
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      role: "Therapist",
+      department: "",
+    });
+    toast.success("Team member added successfully");
+  };
+
+  const handleCreateRole = () => {
+    if (!newRole.name || !newRole.description) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    const role: Role = {
+      id: rolesList.length + 1,
+      name: newRole.name,
+      description: newRole.description,
+      memberCount: 0,
+      permissions: newRole.permissions,
+      color: newRole.color,
+    };
+
+    setRolesList([...rolesList, role]);
+    setShowCreateRoleModal(false);
+    setNewRole({
+      name: "",
+      description: "",
+      color: "from-blue-500 to-indigo-500",
+      permissions: [],
+    });
+    toast.success("Role created successfully");
+  };
+
+  const togglePermission = (perm: string) => {
+    setNewRole(prev => {
+      const perms = prev.permissions.includes(perm)
+        ? prev.permissions.filter(p => p !== perm)
+        : [...prev.permissions, perm];
+      return { ...prev, permissions: perms };
+    });
   };
 
   return (
@@ -435,7 +521,7 @@ export function TeamRoleManagement() {
                       onChange={(e) => setFilterRole(e.target.value)}
                     >
                       <option value="all">All Roles</option>
-                      {roles.map((role) => (
+                      {rolesList.map((role) => (
                         <option key={role.id} value={role.name}>
                           {role.name}
                         </option>
@@ -587,7 +673,7 @@ export function TeamRoleManagement() {
         {/* Roles Tab */}
         {activeTab === "roles" && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {roles.map((role, index) => (
+            {rolesList.map((role, index) => (
               <motion.div
                 key={role.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -709,40 +795,66 @@ export function TeamRoleManagement() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-2">First Name</label>
-                      <Input placeholder="Enter first name..." />
+                      <Input 
+                        placeholder="Enter first name..." 
+                        value={newMember.firstName}
+                        onChange={(e) => setNewMember({ ...newMember, firstName: e.target.value })}
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-2">Last Name</label>
-                      <Input placeholder="Enter last name..." />
+                      <Input 
+                        placeholder="Enter last name..." 
+                        value={newMember.lastName}
+                        onChange={(e) => setNewMember({ ...newMember, lastName: e.target.value })}
+                      />
                     </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Email</label>
-                    <Input type="email" placeholder="email@ezri.health" />
+                    <Input 
+                      type="email" 
+                      placeholder="email@ezri.health" 
+                      value={newMember.email}
+                      onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Phone</label>
-                    <Input type="tel" placeholder="+1 (555) 123-4567" />
+                    <Input 
+                      type="tel" 
+                      placeholder="+1 (555) 123-4567" 
+                      value={newMember.phone}
+                      onChange={(e) => setNewMember({ ...newMember, phone: e.target.value })}
+                    />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-2">Role</label>
-                      <select className="w-full px-3 py-2 border rounded-lg">
-                        {roles.map((role) => (
-                          <option key={role.id}>{role.name}</option>
+                      <select 
+                        className="w-full px-3 py-2 border rounded-lg"
+                        value={newMember.role}
+                        onChange={(e) => setNewMember({ ...newMember, role: e.target.value })}
+                      >
+                        {rolesList.map((role) => (
+                          <option key={role.id} value={role.name}>{role.name}</option>
                         ))}
                       </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-2">Department</label>
-                      <Input placeholder="e.g., Therapy" />
+                      <Input 
+                        placeholder="e.g., Therapy" 
+                        value={newMember.department}
+                        onChange={(e) => setNewMember({ ...newMember, department: e.target.value })}
+                      />
                     </div>
                   </div>
                   <div className="flex gap-2 pt-4">
                     <Button variant="outline" className="flex-1" onClick={() => setShowCreateMemberModal(false)}>
                       Cancel
                     </Button>
-                    <Button className="flex-1">
+                    <Button className="flex-1" onClick={handleAddMember}>
                       Add Member
                     </Button>
                   </div>
@@ -1016,13 +1128,19 @@ export function TeamRoleManagement() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium mb-2">Role Name <span className="text-red-500">*</span></label>
-                    <Input placeholder="e.g., Senior Therapist" />
+                    <Input 
+                      placeholder="e.g., Senior Therapist" 
+                      value={newRole.name}
+                      onChange={(e) => setNewRole({ ...newRole, name: e.target.value })}
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Description</label>
                     <textarea 
                       className="w-full px-3 py-2 border rounded-lg min-h-[80px]"
                       placeholder="Describe the responsibilities and scope of this role..."
+                      value={newRole.description}
+                      onChange={(e) => setNewRole({ ...newRole, description: e.target.value })}
                     />
                   </div>
                   <div>
@@ -1031,7 +1149,8 @@ export function TeamRoleManagement() {
                       {["from-red-500 to-pink-500", "from-orange-500 to-red-500", "from-blue-500 to-indigo-500", "from-green-500 to-blue-500", "from-purple-500 to-pink-500", "from-yellow-500 to-orange-500"].map((color, i) => (
                         <button
                           key={i}
-                          className={`w-10 h-10 rounded-lg bg-gradient-to-br ${color} border-2 border-gray-200 hover:border-gray-400 transition`}
+                          className={`w-10 h-10 rounded-lg bg-gradient-to-br ${color} border-2 transition ${newRole.color === color ? 'border-black scale-110' : 'border-gray-200 hover:border-gray-400'}`}
+                          onClick={() => setNewRole({ ...newRole, color })}
                         />
                       ))}
                     </div>
@@ -1041,7 +1160,12 @@ export function TeamRoleManagement() {
                     <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
                       {["full-access", "system-settings", "user-management", "session-access", "content-edit", "analytics-view", "crisis-access", "support-access", "billing", "audit-logs"].map((perm, i) => (
                         <label key={i} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
-                          <input type="checkbox" className="w-4 h-4" />
+                          <input 
+                            type="checkbox" 
+                            className="w-4 h-4" 
+                            checked={newRole.permissions.includes(perm)}
+                            onChange={() => togglePermission(perm)}
+                          />
                           <span className="text-sm">{perm}</span>
                         </label>
                       ))}
@@ -1051,7 +1175,7 @@ export function TeamRoleManagement() {
                     <Button variant="outline" className="flex-1" onClick={() => setShowCreateRoleModal(false)}>
                       Cancel
                     </Button>
-                    <Button className="flex-1">
+                    <Button className="flex-1" onClick={handleCreateRole}>
                       <Shield className="w-4 h-4 mr-2" />
                       Create Role
                     </Button>

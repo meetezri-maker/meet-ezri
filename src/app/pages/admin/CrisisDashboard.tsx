@@ -36,6 +36,36 @@ export function CrisisDashboard() {
   const [statusNotes, setStatusNotes] = useState("");
   const [newStatus, setNewStatus] = useState<"contacted" | "in-progress" | "resolved">("contacted");
 
+  const handleExport = () => {
+    const headers = ["ID", "User Name", "Risk Level", "Type", "Status", "Timestamp", "Assigned To"];
+    const csvContent = [
+      headers.join(","),
+      ...crisisEvents.map(event =>
+        [
+          event.id,
+          `"${event.userName}"`,
+          event.riskLevel,
+          `"${event.type}"`,
+          event.status,
+          `"${event.timestamp}"`,
+          `"${event.assignedTo || ''}"`
+        ].join(",")
+      )
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "crisis_report.csv");
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   const crisisEvents: CrisisEvent[] = [
     {
       id: 1,
@@ -203,7 +233,7 @@ export function CrisisDashboard() {
               <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
               <span className="text-sm font-medium text-red-700">Live Monitoring Active</span>
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExport}>
               <Download className="w-4 h-4" />
               Export Report
             </Button>

@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { AdminLayoutNew } from "../../components/AdminLayoutNew";
 import { Card } from "../../components/ui/card";
 import { StatsCard } from "../../components/StatsCard";
@@ -26,39 +27,63 @@ import {
 } from "recharts";
 
 export function SessionAnalytics() {
-  const sessionTrendData = [
-    { date: "Mon", sessions: 145 },
-    { date: "Tue", sessions: 178 },
-    { date: "Wed", sessions: 156 },
-    { date: "Thu", sessions: 203 },
-    { date: "Fri", sessions: 189 },
-    { date: "Sat", sessions: 167 },
-    { date: "Sun", sessions: 142 },
-  ];
+  const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("7d");
 
-  const avatarUsageData = [
-    { name: "Serena (Empathetic)", value: 35, color: "#9b87f5" },
-    { name: "Marcus (Direct)", value: 28, color: "#7c3aed" },
-    { name: "Luna (Calm)", value: 22, color: "#d946ef" },
-    { name: "Alex (Balanced)", value: 15, color: "#0ea5e9" },
-  ];
+  // Dynamic Session Trend Data
+  const sessionTrendData = useMemo(() => {
+    const days = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
+    const data = [];
+    const now = new Date();
+    
+    for (let i = 0; i < days; i++) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - (days - 1 - i));
+      const dateStr = timeRange === "7d" 
+        ? date.toLocaleDateString('en-US', { weekday: 'short' })
+        : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      
+      const baseSessions = 140 + (i / days) * 50;
+      const randomVar = Math.random() * 40 - 20;
+      const sessions = Math.max(50, Math.round(baseSessions + randomVar));
+      
+      // Aggregate for longer periods to keep chart readable
+      if (timeRange === "90d" && i % 3 !== 0) continue;
+      
+      data.push({ date: dateStr, sessions });
+    }
+    return data;
+  }, [timeRange]);
 
-  const topicDistributionData = [
-    { topic: "Anxiety", count: 342 },
-    { topic: "Depression", count: 298 },
-    { topic: "Sleep", count: 234 },
-    { topic: "Relationships", count: 189 },
-    { topic: "Stress", count: 167 },
-    { topic: "Self-esteem", count: 145 },
-  ];
+  const rangeFactor = timeRange === "7d" ? 1 : timeRange === "30d" ? 3.5 : 10;
 
-  const sessionDurationData = [
-    { range: "0-15 min", count: 89 },
-    { range: "15-30 min", count: 234 },
-    { range: "30-45 min", count: 456 },
-    { range: "45-60 min", count: 312 },
-    { range: "60+ min", count: 123 },
-  ];
+  const avatarUsageData = useMemo(() => [
+    { name: "Serena (Empathetic)", value: Math.round(35 * rangeFactor), color: "#9b87f5" },
+    { name: "Marcus (Direct)", value: Math.round(28 * rangeFactor), color: "#7c3aed" },
+    { name: "Luna (Calm)", value: Math.round(22 * rangeFactor), color: "#d946ef" },
+    { name: "Alex (Balanced)", value: Math.round(15 * rangeFactor), color: "#0ea5e9" },
+  ], [rangeFactor]);
+
+  const topicDistributionData = useMemo(() => [
+    { topic: "Anxiety", count: Math.round(342 * rangeFactor) },
+    { topic: "Depression", count: Math.round(298 * rangeFactor) },
+    { topic: "Sleep", count: Math.round(234 * rangeFactor) },
+    { topic: "Relationships", count: Math.round(189 * rangeFactor) },
+    { topic: "Stress", count: Math.round(167 * rangeFactor) },
+    { topic: "Self-esteem", count: Math.round(145 * rangeFactor) },
+  ], [rangeFactor]);
+
+  const sessionDurationData = useMemo(() => [
+    { range: "0-15 min", count: Math.round(89 * rangeFactor) },
+    { range: "15-30 min", count: Math.round(234 * rangeFactor) },
+    { range: "30-45 min", count: Math.round(456 * rangeFactor) },
+    { range: "45-60 min", count: Math.round(312 * rangeFactor) },
+    { range: "60+ min", count: Math.round(123 * rangeFactor) },
+  ], [rangeFactor]);
+
+  // Dynamic Stats
+  const totalSessions = Math.round(18459 * rangeFactor).toLocaleString();
+  const activeUsers = Math.round(3284 * rangeFactor).toLocaleString();
+  const sessionsThisPeriod = Math.round(1284 * rangeFactor).toLocaleString();
 
   return (
     <AdminLayoutNew>
@@ -67,18 +92,41 @@ export function SessionAnalytics() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col md:flex-row md:items-center justify-between gap-4"
         >
-          <h1 className="text-3xl font-bold mb-2">Session Analytics</h1>
-          <p className="text-muted-foreground">
-            Monitor AI session usage patterns and metrics
-          </p>
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Session Analytics</h1>
+            <p className="text-muted-foreground">
+              Monitor AI session usage patterns and metrics
+            </p>
+          </div>
+          
+          {/* Time Range Toggle Pills */}
+          <div className="flex items-center p-1 bg-secondary/20 rounded-lg w-fit">
+            {(["7d", "30d", "90d"] as const).map((range) => (
+              <button
+                key={range}
+                onClick={() => setTimeRange(range)}
+                className={`
+                  px-4 py-2 rounded-md text-sm font-medium transition-all duration-200
+                  ${
+                    timeRange === range
+                      ? "bg-white text-primary shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }
+                `}
+              >
+                {range === "7d" ? "7 Days" : range === "30d" ? "30 Days" : "90 Days"}
+              </button>
+            ))}
+          </div>
         </motion.div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatsCard
             title="Total Sessions"
-            value="18,459"
+            value={totalSessions}
             change="+12.5%"
             changeType="positive"
             icon={MessageSquare}
@@ -96,7 +144,7 @@ export function SessionAnalytics() {
           />
           <StatsCard
             title="Active Users"
-            value="3,284"
+            value={activeUsers}
             change="+8.3%"
             changeType="positive"
             icon={Users}
@@ -104,8 +152,8 @@ export function SessionAnalytics() {
             delay={0.2}
           />
           <StatsCard
-            title="Sessions This Week"
-            value="1,284"
+            title={`Sessions (${timeRange})`}
+            value={sessionsThisPeriod}
             change="+15.7%"
             changeType="positive"
             icon={TrendingUp}
@@ -123,7 +171,7 @@ export function SessionAnalytics() {
             transition={{ delay: 0.4 }}
           >
             <Card className="p-6">
-              <h2 className="text-xl font-bold mb-6">Session Trend (7 Days)</h2>
+              <h2 className="text-xl font-bold mb-6">Session Trend ({timeRange === "7d" ? "7 Days" : timeRange === "30d" ? "30 Days" : "90 Days"})</h2>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={sessionTrendData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />

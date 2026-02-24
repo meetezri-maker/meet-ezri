@@ -31,7 +31,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 
@@ -39,46 +39,48 @@ export function UsageOverview() {
   const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("30d");
   const [viewMode, setViewMode] = useState<"daily" | "weekly" | "monthly">("daily");
 
-  // Mock DAU/MAU/WAU Data
-  const dailyActiveUsersData = [
-    { date: "Jan 1", dau: 1245, mau: 3890, wau: 2340 },
-    { date: "Jan 2", dau: 1320, mau: 3920, wau: 2380 },
-    { date: "Jan 3", dau: 1180, mau: 3950, wau: 2420 },
-    { date: "Jan 4", dau: 1450, mau: 3980, wau: 2460 },
-    { date: "Jan 5", dau: 1560, mau: 4010, wau: 2500 },
-    { date: "Jan 6", dau: 1380, mau: 4050, wau: 2540 },
-    { date: "Jan 7", dau: 1290, mau: 4080, wau: 2580 },
-    { date: "Jan 8", dau: 1470, mau: 4120, wau: 2620 },
-    { date: "Jan 9", dau: 1620, mau: 4160, wau: 2660 },
-    { date: "Jan 10", dau: 1550, mau: 4200, wau: 2700 },
-    { date: "Jan 11", dau: 1690, mau: 4240, wau: 2740 },
-    { date: "Jan 12", dau: 1780, mau: 4280, wau: 2780 },
-    { date: "Jan 13", dau: 1650, mau: 4320, wau: 2820 },
-    { date: "Jan 14", dau: 1540, mau: 4360, wau: 2860 },
-    { date: "Jan 15", dau: 1820, mau: 4400, wau: 2900 },
-  ];
+  const dataPoints = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
 
-  // Session Data
-  const sessionData = [
-    { date: "Jan 1", sessions: 2890, avgDuration: 28.5, totalMinutes: 82365 },
-    { date: "Jan 2", sessions: 3120, avgDuration: 31.2, totalMinutes: 97344 },
-    { date: "Jan 3", sessions: 2760, avgDuration: 27.8, totalMinutes: 76728 },
-    { date: "Jan 4", sessions: 3450, avgDuration: 34.1, totalMinutes: 117645 },
-    { date: "Jan 5", sessions: 3680, avgDuration: 36.3, totalMinutes: 133584 },
-    { date: "Jan 6", sessions: 3240, avgDuration: 32.7, totalMinutes: 105948 },
-    { date: "Jan 7", sessions: 2980, avgDuration: 29.4, totalMinutes: 87612 },
-    { date: "Jan 8", sessions: 3510, avgDuration: 35.6, totalMinutes: 124956 },
-    { date: "Jan 9", sessions: 3820, avgDuration: 38.9, totalMinutes: 148598 },
-    { date: "Jan 10", sessions: 3670, avgDuration: 36.2, totalMinutes: 132854 },
-    { date: "Jan 11", sessions: 3990, avgDuration: 39.8, totalMinutes: 158802 },
-    { date: "Jan 12", sessions: 4180, avgDuration: 41.2, totalMinutes: 172216 },
-    { date: "Jan 13", sessions: 3850, avgDuration: 37.9, totalMinutes: 145915 },
-    { date: "Jan 14", sessions: 3620, avgDuration: 35.4, totalMinutes: 128148 },
-    { date: "Jan 15", sessions: 4250, avgDuration: 42.8, totalMinutes: 181900 },
-  ];
+  // Mock DAU/MAU/WAU Data - dynamically generated
+  const dailyActiveUsersData = useMemo(() => Array.from({ length: dataPoints }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (dataPoints - 1 - i));
+    const dateStr = timeRange === "90d"
+      ? `${date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+      : `${date.toLocaleDateString("en-US", { month: "short" })} ${date.getDate()}`;
+
+    return {
+      date: dateStr,
+      dau: 1200 + Math.floor(Math.random() * 600) + i * 5,
+      mau: 3800 + Math.floor(Math.random() * 600) + i * 10,
+      wau: 2300 + Math.floor(Math.random() * 600) + i * 7,
+    };
+  }), [dataPoints, timeRange]);
+
+  // Session Data - dynamically generated
+  const sessionData = useMemo(() => Array.from({ length: dataPoints }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (dataPoints - 1 - i));
+    const dateStr = timeRange === "90d"
+      ? `${date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+      : `${date.toLocaleDateString("en-US", { month: "short" })} ${date.getDate()}`;
+
+    const sessions = 2800 + Math.floor(Math.random() * 1500) + i * 10;
+    const avgDuration = 28 + Math.random() * 15;
+
+    return {
+      date: dateStr,
+      sessions,
+      avgDuration: parseFloat(avgDuration.toFixed(1)),
+      totalMinutes: Math.floor(sessions * avgDuration),
+    };
+  }), [dataPoints, timeRange]);
+
+  // Scale factors based on time range
+  const rangeFactor = timeRange === "7d" ? 1 : timeRange === "30d" ? 3.5 : 10;
 
   // Peak Usage Hours
-  const peakUsageData = [
+  const peakUsageData = useMemo(() => [
     { hour: "12 AM", users: 120 },
     { hour: "1 AM", users: 85 },
     { hour: "2 AM", users: 65 },
@@ -103,88 +105,62 @@ export function UsageOverview() {
     { hour: "9 PM", users: 1189 },
     { hour: "10 PM", users: 945 },
     { hour: "11 PM", users: 567 },
-  ];
+  ].map(d => ({ ...d, users: Math.round(d.users * (1 + (rangeFactor - 1) * 0.2)) })), [rangeFactor]);
 
   // User Activity Distribution
-  const activityDistribution = [
+  const activityDistribution = useMemo(() => [
     { name: "Power Users (>10 sessions/week)", value: 456, color: "#8b5cf6" },
     { name: "Active Users (5-10 sessions/week)", value: 1234, color: "#3b82f6" },
     { name: "Regular Users (2-4 sessions/week)", value: 2345, color: "#10b981" },
     { name: "Casual Users (1 session/week)", value: 890, color: "#f59e0b" },
     { name: "Inactive (no sessions this week)", value: 456, color: "#6b7280" },
-  ];
+  ].map(d => ({ ...d, value: Math.round(d.value * rangeFactor) })), [rangeFactor]);
 
-  const filteredDAUData = dailyActiveUsersData.slice(
-    timeRange === "7d" ? -7 : 0
-  );
+  const stats = useMemo(() => {
+    const totalSessions = sessionData.reduce((acc, curr) => acc + curr.sessions, 0);
+    const totalMinutes = sessionData.reduce((acc, curr) => acc + curr.totalMinutes, 0);
+    const avgDuration = totalSessions > 0 ? totalMinutes / totalSessions : 0;
+    const avgDau = dailyActiveUsersData.reduce((acc, curr) => acc + curr.dau, 0) / dataPoints;
 
-  const filteredSessionData = sessionData.slice(
-    timeRange === "7d" ? -7 : 0
-  );
-
-  const handleExport = () => {
-    const headers = ["Date", "DAU", "MAU", "WAU"];
-    const rows = filteredDAUData.map((item) => [
-      item.date,
-      item.dau,
-      item.mau,
-      item.wau,
-    ]);
-
-    const csvContent = [
-      headers.join(","),
-      ...rows.map((row) => row.join(",")),
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `usage-overview-${timeRange}-${new Date().toISOString().split("T")[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  };
-
-  const stats = [
-    {
-      label: "Daily Active Users",
-      value: "1,820",
-      change: "+12.5%",
-      trend: "up" as const,
-      icon: Users,
-      color: "from-blue-500 to-cyan-600",
-      description: "vs last period",
-    },
-    {
-      label: "Total Sessions Today",
-      value: "4,250",
-      change: "+8.3%",
-      trend: "up" as const,
-      icon: Activity,
-      color: "from-purple-500 to-pink-600",
-      description: "sessions started",
-    },
-    {
-      label: "Total Minutes Consumed",
-      value: "181,900",
-      change: "+15.7%",
-      trend: "up" as const,
-      icon: Clock,
-      color: "from-green-500 to-emerald-600",
-      description: "therapy minutes",
-    },
-    {
-      label: "Avg Session Duration",
-      value: "42.8 min",
-      change: "+3.2%",
-      trend: "up" as const,
-      icon: Target,
-      color: "from-orange-500 to-red-600",
-      description: "per session",
-    },
-  ];
+    return [
+      {
+        label: "Avg Daily Active Users",
+        value: Math.round(avgDau).toLocaleString(),
+        change: "+12.5%",
+        trend: "up" as const,
+        icon: Users,
+        color: "from-blue-500 to-cyan-600",
+        description: "vs last period",
+      },
+      {
+        label: `Total Sessions (${timeRange})`,
+        value: totalSessions.toLocaleString(),
+        change: "+8.3%",
+        trend: "up" as const,
+        icon: Activity,
+        color: "from-purple-500 to-pink-600",
+        description: "sessions started",
+      },
+      {
+        label: "Total Minutes Consumed",
+        value: totalMinutes.toLocaleString(),
+        change: "+15.7%",
+        trend: "up" as const,
+        icon: Clock,
+        color: "from-green-500 to-emerald-600",
+        description: "therapy minutes",
+      },
+      {
+        label: "Avg Session Duration",
+        value: `${avgDuration.toFixed(1)} min`,
+        change: "+3.2%",
+        trend: "up" as const,
+        icon: Target,
+        color: "from-orange-500 to-red-600",
+        description: "per session",
+      },
+    ];
+  }, [sessionData, dailyActiveUsersData, dataPoints, timeRange]);
 
   const COLORS = ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b", "#6b7280"];
 
@@ -223,10 +199,7 @@ export function UsageOverview() {
             </div>
 
             {/* Export Button */}
-            <Button 
-              onClick={handleExport}
-              className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
-            >
+            <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white">
               <Download className="w-4 h-4 mr-2" />
               Export Report
             </Button>
@@ -302,7 +275,7 @@ export function UsageOverview() {
             </div>
 
             <ResponsiveContainer width="100%" height={350}>
-              <AreaChart data={filteredDAUData}>
+              <AreaChart data={dailyActiveUsersData}>
                 <defs>
                   <linearGradient id="colorDAU" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
@@ -378,7 +351,7 @@ export function UsageOverview() {
               </div>
 
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={filteredSessionData}>
+                <BarChart data={sessionData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                   <XAxis dataKey="date" stroke="#9ca3af" />
                   <YAxis stroke="#9ca3af" />
@@ -414,7 +387,7 @@ export function UsageOverview() {
               </div>
 
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={filteredSessionData}>
+                <LineChart data={sessionData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                   <XAxis dataKey="date" stroke="#9ca3af" />
                   <YAxis stroke="#9ca3af" />

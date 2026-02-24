@@ -56,17 +56,20 @@ export function UsageAnalytics() {
         moodChecks: Math.floor(Math.random() * 300) + 200,
         journalEntries: Math.floor(Math.random() * 200) + 100,
         wellness: Math.floor(Math.random() * 150) + 100,
+        moodScore: 6 + Math.random() * 3,
+        completionRate: 85 + Math.random() * 10,
+        engagementRate: 70 + Math.random() * 20,
       });
     }
     return data;
   });
 
   const filteredData = allData.slice(
-    timeRange === "7d" ? -7 : timeRange === "30d" ? -30 : -90
+    timeRange === "7d" ? -7 : timeRange === "30d" ? -30 : timeRange === "90d" ? -90 : 0
   );
 
   const handleExport = () => {
-    const headers = ["Date", "Sessions", "Users", "Avg Duration", "Mood Checks", "Journal Entries", "Wellness"];
+    const headers = ["Date", "Sessions", "Users", "Avg Duration", "Mood Checks", "Journal Entries", "Wellness", "Mood Score", "Completion Rate", "Engagement Rate"];
     const rows = filteredData.map((item) => [
       item.date,
       item.sessions,
@@ -75,6 +78,9 @@ export function UsageAnalytics() {
       item.moodChecks,
       item.journalEntries,
       item.wellness,
+      item.moodScore.toFixed(1),
+      item.completionRate.toFixed(1),
+      item.engagementRate.toFixed(1),
     ]);
 
     const csvContent = [
@@ -93,8 +99,24 @@ export function UsageAnalytics() {
     window.URL.revokeObjectURL(url);
   };
 
+  // Calculate dynamic stats
+  const totalSessions = filteredData.reduce((acc, curr) => acc + curr.sessions, 0);
+  const totalUsers = filteredData.reduce((acc, curr) => acc + curr.users, 0);
+  const avgDuration = Math.round(filteredData.reduce((acc, curr) => acc + curr.avgDuration, 0) / filteredData.length) || 0;
+  const avgMoodScore = (filteredData.reduce((acc, curr) => acc + curr.moodScore, 0) / filteredData.length).toFixed(1);
+  const avgCompletionRate = (filteredData.reduce((acc, curr) => acc + curr.completionRate, 0) / filteredData.length).toFixed(1);
+  const avgEngagementRate = (filteredData.reduce((acc, curr) => acc + curr.engagementRate, 0) / filteredData.length).toFixed(1);
+
+  const getRangeFactor = () => {
+    if (timeRange === "7d") return 1;
+    if (timeRange === "30d") return 3.5;
+    return 10;
+  };
+
+  const rangeFactor = getRangeFactor();
+
   // Avatar usage distribution
-  const avatarData = [
+  const baseAvatarData = [
     { name: "Serena", value: 1245, color: "#8B5CF6" },
     { name: "Marcus", value: 987, color: "#3B82F6" },
     { name: "Luna", value: 856, color: "#EC4899" },
@@ -102,16 +124,26 @@ export function UsageAnalytics() {
     { name: "Kai", value: 634, color: "#F59E0B" },
   ];
 
+  const avatarData = baseAvatarData.map(item => ({
+    ...item,
+    value: Math.round(item.value * rangeFactor)
+  }));
+
   // Session type distribution
-  const sessionTypeData = [
+  const baseSessionTypeData = [
     { name: "Therapy", value: 2567, color: "#3B82F6" },
     { name: "Wellness", value: 1234, color: "#10B981" },
     { name: "Crisis", value: 345, color: "#EF4444" },
     { name: "Check-in", value: 789, color: "#8B5CF6" },
   ];
 
+  const sessionTypeData = baseSessionTypeData.map(item => ({
+    ...item,
+    value: Math.round(item.value * rangeFactor)
+  }));
+
   // Peak usage hours
-  const hourlyData = [
+  const baseHourlyData = [
     { hour: "12am", sessions: 45 },
     { hour: "3am", sessions: 23 },
     { hour: "6am", sessions: 67 },
@@ -122,20 +154,43 @@ export function UsageAnalytics() {
     { hour: "9pm", sessions: 267 },
   ];
 
+  const hourlyData = baseHourlyData.map(item => ({
+    ...item,
+    sessions: Math.round(item.sessions * rangeFactor)
+  }));
+
   // User retention data
-  const retentionData = [
-    { week: "Week 1", retained: 100, churned: 0 },
-    { week: "Week 2", retained: 87, churned: 13 },
-    { week: "Week 3", retained: 76, churned: 11 },
-    { week: "Week 4", retained: 68, churned: 8 },
-    { week: "Week 5", retained: 64, churned: 4 },
-    { week: "Week 6", retained: 61, churned: 3 },
-  ];
+  const retentionData = (() => {
+    if (timeRange === "7d") {
+      return [
+        { week: "Day 1", retained: 100, churned: 0 },
+        { week: "Day 2", retained: 95, churned: 5 },
+        { week: "Day 3", retained: 90, churned: 10 },
+        { week: "Day 4", retained: 88, churned: 12 },
+        { week: "Day 5", retained: 85, churned: 15 },
+        { week: "Day 6", retained: 82, churned: 18 },
+        { week: "Day 7", retained: 80, churned: 20 },
+      ];
+    }
+    if (timeRange === "30d") {
+      return [
+        { week: "Week 1", retained: 100, churned: 0 },
+        { week: "Week 2", retained: 87, churned: 13 },
+        { week: "Week 3", retained: 76, churned: 24 },
+        { week: "Week 4", retained: 68, churned: 32 },
+      ];
+    }
+    return [
+      { week: "Month 1", retained: 100, churned: 0 },
+      { week: "Month 2", retained: 75, churned: 25 },
+      { week: "Month 3", retained: 60, churned: 40 },
+    ];
+  })();
 
   const stats = [
     {
       label: "Total Sessions",
-      value: "12,456",
+      value: totalSessions.toLocaleString(),
       change: "+12.5%",
       trend: "up",
       icon: MessageSquare,
@@ -144,7 +199,7 @@ export function UsageAnalytics() {
     },
     {
       label: "Active Users",
-      value: "8,234",
+      value: totalUsers.toLocaleString(),
       change: "+8.3%",
       trend: "up",
       icon: Users,
@@ -153,7 +208,7 @@ export function UsageAnalytics() {
     },
     {
       label: "Avg Session Time",
-      value: "45 min",
+      value: `${avgDuration} min`,
       change: "+3.2%",
       trend: "up",
       icon: Clock,
@@ -162,7 +217,7 @@ export function UsageAnalytics() {
     },
     {
       label: "Engagement Rate",
-      value: "78.5%",
+      value: `${avgEngagementRate}%`,
       change: "-2.1%",
       trend: "down",
       icon: Activity,
@@ -171,7 +226,7 @@ export function UsageAnalytics() {
     },
     {
       label: "Avg Mood Score",
-      value: "7.2/10",
+      value: `${avgMoodScore}/10`,
       change: "+0.8",
       trend: "up",
       icon: Heart,
@@ -180,7 +235,7 @@ export function UsageAnalytics() {
     },
     {
       label: "Completion Rate",
-      value: "92.3%",
+      value: `${avgCompletionRate}%`,
       change: "+4.7%",
       trend: "up",
       icon: TrendingUp,
@@ -209,22 +264,25 @@ export function UsageAnalytics() {
                 </p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <select
-                className="px-3 py-2 border rounded-lg"
-                value={timeRange}
-                onChange={(e) => setTimeRange(e.target.value)}
-              >
-                <option value="7d">Last 7 Days</option>
-                <option value="30d">Last 30 Days</option>
-                <option value="90d">Last 90 Days</option>
-                <option value="1y">Last Year</option>
-              </select>
-              <Button variant="outline" className="gap-2" onClick={handleExport}>
-                <Download className="w-4 h-4" />
-                Export
-              </Button>
+            <div className="flex items-center gap-2 bg-gray-100 rounded-xl p-1 border border-gray-200">
+              {(["7d", "30d", "90d"] as const).map((range) => (
+                <button
+                  key={range}
+                  onClick={() => setTimeRange(range)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    timeRange === range
+                      ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                      : "text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  {range === "7d" ? "7 Days" : range === "30d" ? "30 Days" : "90 Days"}
+                </button>
+              ))}
             </div>
+            <Button variant="outline" className="gap-2" onClick={handleExport}>
+              <Download className="w-4 h-4" />
+              Export
+            </Button>
           </div>
         </motion.div>
 

@@ -43,9 +43,50 @@ export function TherapistManagement() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [newTherapist, setNewTherapist] = useState({
+    name: "",
+    license: "",
+    email: "",
+    phone: "",
+    specialization: "",
+    languages: "",
+    availability: ""
+  });
+
+  const handleAddTherapist = () => {
+    if (!newTherapist.name || !newTherapist.email) return;
+
+    const therapist: Therapist = {
+      id: `th${Date.now()}`,
+      name: newTherapist.name,
+      email: newTherapist.email,
+      phone: newTherapist.phone,
+      specialization: newTherapist.specialization.split(",").map(s => s.trim()),
+      license: newTherapist.license,
+      status: "pending",
+      verified: false,
+      joinedDate: new Date(),
+      sessionsCount: 0,
+      rating: 0,
+      availability: newTherapist.availability,
+      languages: newTherapist.languages.split(",").map(l => l.trim())
+    };
+
+    setTherapistsList([...therapistsList, therapist]);
+    setShowCreateModal(false);
+    setNewTherapist({
+      name: "",
+      license: "",
+      email: "",
+      phone: "",
+      specialization: "",
+      languages: "",
+      availability: ""
+    });
+  };
 
   // Mock therapists data
-  const therapists: Therapist[] = [
+  const [therapistsList, setTherapistsList] = useState<Therapist[]>([
     {
       id: "th001",
       name: "Dr. Sarah Mitchell",
@@ -136,9 +177,9 @@ export function TherapistManagement() {
       availability: "Wed-Sun, 11AM-7PM",
       languages: ["English", "Korean"]
     }
-  ];
+  ]);
 
-  const filteredTherapists = therapists.filter(therapist => {
+  const filteredTherapists = therapistsList.filter(therapist => {
     const matchesSearch = 
       therapist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       therapist.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -166,11 +207,11 @@ export function TherapistManagement() {
   };
 
   const stats = {
-    total: therapists.length,
-    active: therapists.filter(t => t.status === "active").length,
-    pending: therapists.filter(t => t.status === "pending").length,
-    totalSessions: therapists.reduce((sum, t) => sum + t.sessionsCount, 0),
-    avgRating: (therapists.filter(t => t.rating > 0).reduce((sum, t) => sum + t.rating, 0) / therapists.filter(t => t.rating > 0).length).toFixed(1)
+    total: therapistsList.length,
+    active: therapistsList.filter(t => t.status === "active").length,
+    pending: therapistsList.filter(t => t.status === "pending").length,
+    totalSessions: therapistsList.reduce((sum, t) => sum + t.sessionsCount, 0),
+    avgRating: (therapistsList.filter(t => t.rating > 0).reduce((sum, t) => sum + t.rating, 0) / therapistsList.filter(t => t.rating > 0).length).toFixed(1)
   };
 
   return (
@@ -486,6 +527,8 @@ export function TherapistManagement() {
                     <input
                       type="text"
                       placeholder="Dr. Jane Smith"
+                      value={newTherapist.name}
+                      onChange={(e) => setNewTherapist({...newTherapist, name: e.target.value})}
                       className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
                     />
                   </div>
@@ -495,6 +538,8 @@ export function TherapistManagement() {
                     <input
                       type="text"
                       placeholder="LCSW-12345"
+                      value={newTherapist.license}
+                      onChange={(e) => setNewTherapist({...newTherapist, license: e.target.value})}
                       className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
                     />
                   </div>
@@ -506,6 +551,8 @@ export function TherapistManagement() {
                     <input
                       type="email"
                       placeholder="therapist@ezri.com"
+                      value={newTherapist.email}
+                      onChange={(e) => setNewTherapist({...newTherapist, email: e.target.value})}
                       className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
                     />
                   </div>
@@ -515,6 +562,8 @@ export function TherapistManagement() {
                     <input
                       type="tel"
                       placeholder="+1 (555) 123-4567"
+                      value={newTherapist.phone}
+                      onChange={(e) => setNewTherapist({...newTherapist, phone: e.target.value})}
                       className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
                     />
                   </div>
@@ -525,6 +574,8 @@ export function TherapistManagement() {
                   <input
                     type="text"
                     placeholder="e.g., Anxiety, Depression, Trauma (comma separated)"
+                    value={newTherapist.specialization}
+                    onChange={(e) => setNewTherapist({...newTherapist, specialization: e.target.value})}
                     className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
@@ -534,6 +585,8 @@ export function TherapistManagement() {
                   <input
                     type="text"
                     placeholder="e.g., English, Spanish (comma separated)"
+                    value={newTherapist.languages}
+                    onChange={(e) => setNewTherapist({...newTherapist, languages: e.target.value})}
                     className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
@@ -543,6 +596,8 @@ export function TherapistManagement() {
                   <input
                     type="text"
                     placeholder="e.g., Mon-Fri, 9AM-5PM"
+                    value={newTherapist.availability}
+                    onChange={(e) => setNewTherapist({...newTherapist, availability: e.target.value})}
                     className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
@@ -561,7 +616,7 @@ export function TherapistManagement() {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={handleAddTherapist}
                   className="flex-1 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium"
                 >
                   Add Therapist

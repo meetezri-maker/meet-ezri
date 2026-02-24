@@ -305,6 +305,16 @@ export function WellnessContentLibrary() {
             <Button
               variant="outline"
               className="border-gray-300 text-gray-700 hover:bg-gray-300"
+              onClick={() => {
+                console.log('Exporting wellness content...');
+                const dataStr = JSON.stringify(filteredContent, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                const exportFileDefaultName = `wellness-content-${new Date().toISOString().split('T')[0]}.json`;
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+              }}
             >
               <Download className="w-4 h-4 mr-2" />
               Export

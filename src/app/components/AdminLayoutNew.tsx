@@ -425,7 +425,7 @@ export function AdminLayoutNew({ children }: AdminLayoutProps) {
               onClick={handleLogout} 
               variant="ghost" 
               size="sm"
-              className="w-full justify-start gap-2 text-xs h-8 text-gray-700 hover:bg-gray-500"
+              className="w-full justify-start gap-2 text-xs h-8 text-gray-700 hover:bg-gray-100"
             >
               <LogOut className="w-3.5 h-3.5" />
               Logout
