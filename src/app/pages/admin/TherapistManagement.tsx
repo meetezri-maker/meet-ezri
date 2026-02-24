@@ -420,7 +420,7 @@ export function TherapistManagement() {
                           setSelectedTherapist(therapist);
                           setShowViewModal(true);
                         }}
-                        className="p-2 rounded-lg hover:bg-blue-50 text-blue-600"
+                        className="p-2 rounded-lg hover:bg-blue-300 text-blue-600"
                       >
                         <Eye className="w-4 h-4" />
                       </motion.button>

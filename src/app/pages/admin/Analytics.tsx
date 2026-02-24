@@ -73,6 +73,31 @@ export function Analytics() {
     return 4;
   };
 
+  const handleExport = () => {
+    const headers = ["Month", "Total Revenue", "Recurring", "One-Time"];
+    const rows = revenueData.map((item) => [
+      item.month,
+      item.revenue,
+      item.recurring,
+      item.oneTime,
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `analytics-revenue-${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
   const rangeFactor = getRangeFactor();
 
   const visibleUserGrowth = (() => {
@@ -165,6 +190,7 @@ export function Analytics() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={handleExport}
               className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white flex items-center gap-2 shadow-lg"
             >
               <Download className="w-4 h-4" />

@@ -409,7 +409,7 @@ export function EmailTemplates() {
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="p-2 rounded-lg hover:bg-blue-50 text-blue-600"
+                      className="p-2 rounded-lg hover:bg-blue-300 text-blue-600"
                     >
                       <Edit className="w-4 h-4" />
                     </motion.button>

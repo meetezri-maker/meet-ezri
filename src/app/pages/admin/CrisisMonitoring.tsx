@@ -277,7 +277,7 @@ export function CrisisMonitoring() {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="gap-2 hover:bg-blue-50"
+                            className="gap-2 hover:bg-blue-300"
                             onClick={() => {
                               setSelectedEvent(event);
                               setShowDetailsModal(true);

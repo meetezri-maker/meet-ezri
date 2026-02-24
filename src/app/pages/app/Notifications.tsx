@@ -211,7 +211,7 @@ export function Notifications() {
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
                               onClick={() => markAsRead(notification.id)}
-                              className="p-2 rounded-lg hover:bg-blue-50 text-blue-600 transition-colors"
+                              className="p-2 rounded-lg hover:bg-blue-300 text-blue-600 transition-colors"
                               title="Mark as read"
                             >
                               <CheckCircle2 className="w-4 h-4" />

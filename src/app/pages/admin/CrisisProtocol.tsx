@@ -45,6 +45,7 @@ export function CrisisProtocol() {
   const [activeStep, setActiveStep] = useState(1);
   const [showContactModal, setShowContactModal] = useState(false);
   const [showAlertTeamModal, setShowAlertTeamModal] = useState(false);
+  const [showHotlineModal, setShowHotlineModal] = useState(false);
   const [showCopyModal, setShowCopyModal] = useState(false);
   const [contactNotes, setContactNotes] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
@@ -249,6 +250,7 @@ export function CrisisProtocol() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="px-4 py-2 rounded-xl bg-red-500 text-white flex items-center gap-2 shadow-lg"
+              onClick={() => setShowHotlineModal(true)}
             >
               <Phone className="w-4 h-4" />
               Emergency Hotline
@@ -884,6 +886,70 @@ ${selectedCase.notes.map((note, i) => `${i + 1}. ${note}`).join('\n')}
                 >
                   Close
                 </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Hotline Modal */}
+      <AnimatePresence>
+        {showHotlineModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowHotlineModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-900">
+                  <Phone className="w-6 h-6 text-red-600" />
+                  Emergency Contacts
+                </h2>
+                <button
+                  onClick={() => setShowHotlineModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+                  <h3 className="font-bold text-red-900 mb-2">Emergency Services</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-gray-700">Emergency</span>
+                      <a href="tel:911" className="text-red-600 font-bold hover:underline">911</a>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-gray-700">Suicide Prevention</span>
+                      <a href="tel:988" className="text-red-600 font-bold hover:underline">988</a>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                  <h3 className="font-bold text-blue-900 mb-2">Internal Crisis Team</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-gray-700">On-Call Doctor</span>
+                      <a href="tel:+15550123456" className="text-blue-600 font-bold hover:underline">+1 (555) 012-3456</a>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-gray-700">Supervisor</span>
+                      <a href="tel:+15550123457" className="text-blue-600 font-bold hover:underline">+1 (555) 012-3457</a>
+                    </div>
+                  </div>
+                </div>
               </div>
             </motion.div>
           </motion.div>

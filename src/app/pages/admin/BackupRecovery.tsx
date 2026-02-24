@@ -252,7 +252,7 @@ export function BackupRecovery() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-300"
                           onClick={() => handleViewBackup(backup)}
                         >
                           <Eye className="w-3 h-3 mr-1" />

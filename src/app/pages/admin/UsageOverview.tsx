@@ -114,6 +114,39 @@ export function UsageOverview() {
     { name: "Inactive (no sessions this week)", value: 456, color: "#6b7280" },
   ];
 
+  const filteredDAUData = dailyActiveUsersData.slice(
+    timeRange === "7d" ? -7 : 0
+  );
+
+  const filteredSessionData = sessionData.slice(
+    timeRange === "7d" ? -7 : 0
+  );
+
+  const handleExport = () => {
+    const headers = ["Date", "DAU", "MAU", "WAU"];
+    const rows = filteredDAUData.map((item) => [
+      item.date,
+      item.dau,
+      item.mau,
+      item.wau,
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `usage-overview-${timeRange}-${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
   const stats = [
     {
       label: "Daily Active Users",
@@ -190,7 +223,10 @@ export function UsageOverview() {
             </div>
 
             {/* Export Button */}
-            <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white">
+            <Button 
+              onClick={handleExport}
+              className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+            >
               <Download className="w-4 h-4 mr-2" />
               Export Report
             </Button>
@@ -266,7 +302,7 @@ export function UsageOverview() {
             </div>
 
             <ResponsiveContainer width="100%" height={350}>
-              <AreaChart data={dailyActiveUsersData}>
+              <AreaChart data={filteredDAUData}>
                 <defs>
                   <linearGradient id="colorDAU" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
@@ -342,7 +378,7 @@ export function UsageOverview() {
               </div>
 
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={sessionData}>
+                <BarChart data={filteredSessionData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                   <XAxis dataKey="date" stroke="#9ca3af" />
                   <YAxis stroke="#9ca3af" />
@@ -378,7 +414,7 @@ export function UsageOverview() {
               </div>
 
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={sessionData}>
+                <LineChart data={filteredSessionData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                   <XAxis dataKey="date" stroke="#9ca3af" />
                   <YAxis stroke="#9ca3af" />

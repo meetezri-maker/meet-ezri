@@ -138,28 +138,28 @@ export function Error404() {
           <div className="grid grid-cols-2 gap-3">
             <Link 
               to="/app/session-lobby"
-              className="p-3 rounded-xl bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 transition-colors"
+              className="p-3 rounded-xl bg-gray-50 hover:bg-blue-300 border border-gray-200 hover:border-blue-200 transition-colors"
             >
               <p className="text-sm font-medium text-gray-900">Start Session</p>
             </Link>
             
             <Link 
               to="/app/mood-checkin"
-              className="p-3 rounded-xl bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 transition-colors"
+              className="p-3 rounded-xl bg-gray-50 hover:bg-blue-300 border border-gray-200 hover:border-blue-200 transition-colors"
             >
               <p className="text-sm font-medium text-gray-900">Mood Check-in</p>
             </Link>
             
             <Link 
               to="/app/journal"
-              className="p-3 rounded-xl bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 transition-colors"
+              className="p-3 rounded-xl bg-gray-50 hover:bg-blue-300 border border-gray-200 hover:border-blue-200 transition-colors"
             >
               <p className="text-sm font-medium text-gray-900">Journal</p>
             </Link>
             
             <Link 
               to="/app/settings"
-              className="p-3 rounded-xl bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 transition-colors"
+              className="p-3 rounded-xl bg-gray-50 hover:bg-blue-300 border border-gray-200 hover:border-blue-200 transition-colors"
             >
               <p className="text-sm font-medium text-gray-900">Settings</p>
             </Link>

@@ -492,7 +492,7 @@ export function CommunityManagement() {
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => handleViewPost(post)}
-                            className="p-2 rounded-lg hover:bg-blue-50 text-blue-600"
+                            className="p-2 rounded-lg hover:bg-blue-300 text-blue-600"
                             title="View Details"
                           >
                             <Eye className="w-4 h-4" />
@@ -736,7 +736,7 @@ export function CommunityManagement() {
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => handleViewPost(post)}
-                            className="p-2 rounded-lg hover:bg-blue-50 text-blue-600"
+                            className="p-2 rounded-lg hover:bg-blue-300 text-blue-600"
                           >
                             <Eye className="w-4 h-4" />
                           </motion.button>

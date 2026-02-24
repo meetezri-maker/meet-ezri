@@ -285,7 +285,7 @@ export function LegalDocumentation() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-300"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();

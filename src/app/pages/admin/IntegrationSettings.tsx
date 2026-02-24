@@ -455,7 +455,7 @@ export function IntegrationSettings() {
                             setSelectedIntegration(integration);
                             setShowEditModal(true);
                           }}
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-300"
                         >
                           <Edit className="w-4 h-4 mr-1" />
                           Edit
@@ -561,7 +561,7 @@ export function IntegrationSettings() {
                             setSelectedWebhook(webhook);
                             setShowEditWebhookModal(true);
                           }}
-                          className="text-blue-600 hover:bg-blue-50"
+                          className="text-blue-600 hover:bg-blue-300"
                         >
                           <Edit className="w-4 h-4" />
                         </Button>

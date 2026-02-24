@@ -48,8 +48,33 @@ import { Button } from "@/app/components/ui/button";
 export function FeatureAdoption() {
   const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("30d");
 
+  const handleExport = () => {
+    const headers = ["Feature", "Adoption %", "Users", "Growth %"];
+    const rows = featureAdoptionData.map((item) => [
+      item.feature,
+      item.adoption,
+      item.users,
+      item.growth,
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `feature-adoption-${timeRange}-${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
   // Overall Feature Adoption
-  const featureAdoptionData = [
+  const allFeatureAdoptionData = [
     {
       feature: "AI Therapy Sessions",
       adoption: 95,
@@ -100,8 +125,14 @@ export function FeatureAdoption() {
     },
   ];
 
+  const featureAdoptionData = allFeatureAdoptionData.map(item => ({
+    ...item,
+    users: timeRange === "7d" ? Math.floor(item.users * 0.2) : timeRange === "30d" ? Math.floor(item.users * 0.8) : item.users,
+    growth: timeRange === "7d" ? item.growth * 2 : item.growth
+  }));
+
   // Adoption Trend Over Time
-  const adoptionTrendData = [
+  const allAdoptionTrendData = [
     { month: "Jul", aiSessions: 78, moodTracking: 65, journaling: 45, wellness: 52 },
     { month: "Aug", aiSessions: 82, moodTracking: 70, journaling: 52, wellness: 58 },
     { month: "Sep", aiSessions: 85, moodTracking: 75, journaling: 58, wellness: 61 },
@@ -111,8 +142,14 @@ export function FeatureAdoption() {
     { month: "Jan", aiSessions: 95, moodTracking: 89, journaling: 72, wellness: 68 },
   ];
 
+  const adoptionTrendData = timeRange === "7d" 
+    ? allAdoptionTrendData.slice(-3) 
+    : timeRange === "30d" 
+      ? allAdoptionTrendData.slice(-5) 
+      : allAdoptionTrendData;
+
   // Feature Rollout Impact
-  const rolloutImpactData = [
+  const allRolloutImpactData = [
     { week: "Pre-Launch", users: 0, engagement: 0 },
     { week: "Week 1", users: 456, engagement: 23 },
     { week: "Week 2", users: 1234, engagement: 45 },
@@ -123,6 +160,12 @@ export function FeatureAdoption() {
     { week: "Week 7", users: 4350, engagement: 87 },
     { week: "Week 8", users: 4520, engagement: 89 },
   ];
+
+  const rolloutImpactData = timeRange === "7d"
+    ? allRolloutImpactData.slice(-3)
+    : timeRange === "30d"
+      ? allRolloutImpactData.slice(-5)
+      : allRolloutImpactData;
 
   // Adoption Funnel
   const adoptionFunnelData = [
@@ -246,7 +289,7 @@ export function FeatureAdoption() {
                   onClick={() => setTimeRange(range)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                     timeRange === range
-                      ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                      ? "bg-gradient-to-r from-purple-500 to-pink-500 text-black shadow-lg"
                       : "text-gray-600 hover:bg-gray-200"
                   }`}
                 >
@@ -255,7 +298,10 @@ export function FeatureAdoption() {
               ))}
             </div>
 
-            <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white">
+            <Button 
+              onClick={handleExport}
+              className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-black"
+            >
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
@@ -283,7 +329,7 @@ export function FeatureAdoption() {
                   <div
                     className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg`}
                   >
-                    <stat.icon className="w-6 h-6 text-white" />
+                    <stat.icon className="w-6 h-6 text-black" />
                   </div>
                   <div
                     className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
@@ -317,7 +363,7 @@ export function FeatureAdoption() {
           <Card className="bg-white/10 backdrop-blur-xl border-white/20 p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-xl font-bold text-white mb-1">
+                <h3 className="text-xl font-bold text-black mb-1">
                   Feature Adoption Overview
                 </h3>
                 <p className="text-sm text-gray-400">
@@ -347,7 +393,7 @@ export function FeatureAdoption() {
                       />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-white text-sm">
+                      <h4 className="font-semibold text-black text-sm">
                         {feature.feature}
                       </h4>
                       <p className="text-xs text-gray-400">{feature.users.toLocaleString()} users</p>
@@ -357,7 +403,7 @@ export function FeatureAdoption() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-400">Adoption</span>
-                      <span className="text-white font-bold">{feature.adoption}%</span>
+                      <span className="text-black font-bold">{feature.adoption}%</span>
                     </div>
                     <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                       <motion.div
@@ -397,7 +443,7 @@ export function FeatureAdoption() {
             <Card className="bg-white/10 backdrop-blur-xl border-white/20 p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-1">
+                  <h3 className="text-xl font-bold text-black mb-1">
                     Adoption Trend Over Time
                   </h3>
                   <p className="text-sm text-gray-400">Monthly adoption rates</p>
@@ -461,7 +507,7 @@ export function FeatureAdoption() {
             <Card className="bg-white/10 backdrop-blur-xl border-white/20 p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-1">
+                  <h3 className="text-xl font-bold text-black mb-1">
                     Feature Rollout Impact
                   </h3>
                   <p className="text-sm text-gray-400">New feature adoption curve</p>
@@ -529,7 +575,7 @@ export function FeatureAdoption() {
             <Card className="bg-white/10 backdrop-blur-xl border-white/20 p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-1">
+                  <h3 className="text-xl font-bold text-black mb-1">
                     Feature Adoption Funnel
                   </h3>
                   <p className="text-sm text-gray-400">User journey to power user</p>
@@ -543,7 +589,7 @@ export function FeatureAdoption() {
                   return (
                     <div key={stage.stage} className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-white font-medium text-sm">
+                        <span className="text-black font-medium text-sm">
                           {stage.stage}
                         </span>
                         <span className="text-gray-400 text-sm">
@@ -551,7 +597,7 @@ export function FeatureAdoption() {
                         </span>
                       </div>
                       <div className="h-8 rounded-lg overflow-hidden" style={{ width: `${percentage}%`, backgroundColor: stage.fill }}>
-                        <div className="h-full flex items-center justify-center text-white text-xs font-medium">
+                        <div className="h-full flex items-center justify-center text-black text-xs font-medium">
                           {percentage}%
                         </div>
                       </div>
@@ -571,7 +617,7 @@ export function FeatureAdoption() {
             <Card className="bg-white/10 backdrop-blur-xl border-white/20 p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-1">
+                  <h3 className="text-xl font-bold text-black mb-1">
                     Time to Adoption
                   </h3>
                   <p className="text-sm text-gray-400">

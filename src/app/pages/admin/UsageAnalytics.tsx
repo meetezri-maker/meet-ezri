@@ -41,27 +41,57 @@ export function UsageAnalytics() {
   const [timeRange, setTimeRange] = useState("7d");
   const [selectedMetric, setSelectedMetric] = useState("sessions");
 
-  // Session data over time
-  const sessionData = [
-    { date: "Dec 23", sessions: 245, users: 189, avgDuration: 42 },
-    { date: "Dec 24", sessions: 198, users: 156, avgDuration: 38 },
-    { date: "Dec 25", sessions: 156, users: 124, avgDuration: 35 },
-    { date: "Dec 26", sessions: 289, users: 221, avgDuration: 45 },
-    { date: "Dec 27", sessions: 312, users: 245, avgDuration: 48 },
-    { date: "Dec 28", sessions: 298, users: 234, avgDuration: 46 },
-    { date: "Dec 29", sessions: 334, users: 267, avgDuration: 50 },
-  ];
+  const [allData] = useState(() => {
+    const data = [];
+    const baseDate = new Date();
+    baseDate.setDate(baseDate.getDate() - 90);
+    for (let i = 0; i < 90; i++) {
+      const date = new Date(baseDate);
+      date.setDate(baseDate.getDate() + i);
+      data.push({
+        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        sessions: Math.floor(Math.random() * 200) + 150,
+        users: Math.floor(Math.random() * 150) + 100,
+        avgDuration: Math.floor(Math.random() * 20) + 30,
+        moodChecks: Math.floor(Math.random() * 300) + 200,
+        journalEntries: Math.floor(Math.random() * 200) + 100,
+        wellness: Math.floor(Math.random() * 150) + 100,
+      });
+    }
+    return data;
+  });
 
-  // User engagement data
-  const engagementData = [
-    { date: "Dec 23", moodChecks: 456, journalEntries: 234, wellness: 189 },
-    { date: "Dec 24", moodChecks: 398, journalEntries: 201, wellness: 167 },
-    { date: "Dec 25", moodChecks: 312, journalEntries: 178, wellness: 145 },
-    { date: "Dec 26", moodChecks: 512, journalEntries: 289, wellness: 223 },
-    { date: "Dec 27", moodChecks: 545, journalEntries: 312, wellness: 245 },
-    { date: "Dec 28", moodChecks: 523, journalEntries: 298, wellness: 234 },
-    { date: "Dec 29", moodChecks: 589, journalEntries: 334, wellness: 267 },
-  ];
+  const filteredData = allData.slice(
+    timeRange === "7d" ? -7 : timeRange === "30d" ? -30 : -90
+  );
+
+  const handleExport = () => {
+    const headers = ["Date", "Sessions", "Users", "Avg Duration", "Mood Checks", "Journal Entries", "Wellness"];
+    const rows = filteredData.map((item) => [
+      item.date,
+      item.sessions,
+      item.users,
+      item.avgDuration,
+      item.moodChecks,
+      item.journalEntries,
+      item.wellness,
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `usage-analytics-${timeRange}-${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
 
   // Avatar usage distribution
   const avatarData = [
@@ -190,7 +220,7 @@ export function UsageAnalytics() {
                 <option value="90d">Last 90 Days</option>
                 <option value="1y">Last Year</option>
               </select>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2" onClick={handleExport}>
                 <Download className="w-4 h-4" />
                 Export
               </Button>
@@ -265,7 +295,7 @@ export function UsageAnalytics() {
               </div>
             </div>
             <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={sessionData}>
+              <AreaChart data={filteredData}>
                 <defs>
                   <linearGradient id="colorSessions" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
@@ -298,7 +328,7 @@ export function UsageAnalytics() {
           <Card className="p-6">
             <h2 className="text-xl font-bold mb-6">User Engagement</h2>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={engagementData}>
+              <BarChart data={filteredData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis />

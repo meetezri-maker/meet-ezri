@@ -117,6 +117,41 @@ export function EngagementMetrics() {
     return returnRateData;
   })();
 
+  const visibleSessionFrequency = sessionFrequencyData.map(item => ({
+    ...item,
+    users: Math.round(item.users * rangeFactor),
+  }));
+
+  const visibleFeatureEngagement = featureEngagementData.map(item => ({
+    ...item,
+    usage: Math.min(100, Math.round(item.usage * (rangeFactor > 1 ? 1.1 : rangeFactor < 1 ? 0.9 : 1))),
+  }));
+
+  const handleExport = () => {
+    const headers = ["Date", "Score", "Sessions", "Journal Entries"];
+    const rows = visibleEngagementTrend.map((item) => [
+      item.date,
+      item.score,
+      item.sessions,
+      item.journalEntries,
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `engagement-metrics-${timeRange}-${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
   const stats = [
     {
       label: "Overall Engagement Score",
@@ -198,7 +233,10 @@ export function EngagementMetrics() {
               ))}
             </div>
 
-            <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white">
+            <Button 
+              onClick={handleExport}
+              className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+            >
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
@@ -341,7 +379,7 @@ export function EngagementMetrics() {
               </div>
 
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={sessionFrequencyData} layout="vertical">
+                <BarChart data={visibleSessionFrequency} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                   <XAxis type="number" stroke="#9ca3af" />
                   <YAxis dataKey="range" type="category" stroke="#9ca3af" width={120} />
@@ -354,7 +392,7 @@ export function EngagementMetrics() {
                     }}
                   />
                   <Bar dataKey="users" fill="#8b5cf6" radius={[0, 8, 8, 0]}>
-                    {sessionFrequencyData.map((entry, index) => (
+                    {visibleSessionFrequency.map((entry, index) => (
                       <text
                         key={index}
                         x={entry.users + 50}
@@ -389,7 +427,7 @@ export function EngagementMetrics() {
               </div>
 
               <div className="space-y-4">
-                {featureEngagementData.map((feature, index) => (
+                {visibleFeatureEngagement.map((feature, index) => (
                   <div key={feature.feature} className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-white font-medium">{feature.feature}</span>

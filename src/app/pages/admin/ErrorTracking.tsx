@@ -561,7 +561,7 @@ export function ErrorTracking() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-300"
                             onClick={() => handleViewDetails(error)}
                           >
                             <Eye className="w-4 h-4 mr-1" />

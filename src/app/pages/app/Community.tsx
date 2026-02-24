@@ -417,7 +417,7 @@ export function Community() {
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-all"
+                          className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-blue-300 hover:text-blue-600 transition-all"
                           onClick={() => handleSharePost(post.id)}
                         >
                           <Share2 className="w-5 h-5" />
