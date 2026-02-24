@@ -119,6 +119,31 @@ export function RetentionMetrics() {
     return retentionCurveData;
   })();
 
+  const handleExport = () => {
+    const headers = ["Month", "Churn Rate (%)", "New Users", "Churned Users"];
+    const rows = visibleChurnRate.map((item) => [
+      item.month,
+      item.churnRate,
+      item.newUsers,
+      item.churned,
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `retention-metrics-${timeRange}-${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
   const stats = [
     {
       label: "30-Day Retention",
@@ -202,7 +227,10 @@ export function RetentionMetrics() {
               ))}
             </div>
 
-            <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white">
+            <Button 
+              onClick={handleExport}
+              className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+            >
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>

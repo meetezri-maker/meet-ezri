@@ -127,6 +127,18 @@ export function EngagementMetrics() {
     usage: Math.min(100, Math.round(item.usage * (rangeFactor > 1 ? 1.1 : rangeFactor < 1 ? 0.9 : 1))),
   }));
 
+  const visibleUserJourney = userJourneyData.map(item => ({
+    ...item,
+    completion: Math.min(100, Math.round(item.completion * (rangeFactor > 1 ? 0.95 : rangeFactor < 1 ? 1.05 : 1))),
+    dropoff: Math.max(0, Math.round(item.dropoff * (rangeFactor > 1 ? 1.1 : rangeFactor < 1 ? 0.9 : 1)))
+  }));
+
+  const visibleTimeOfDay = timeOfDayEngagement.map(item => ({
+    ...item,
+    engagement: Math.min(100, Math.round(item.engagement * (rangeFactor > 1 ? 0.95 : rangeFactor < 1 ? 1.05 : 1))),
+    sessions: Math.round(item.sessions * rangeFactor)
+  }));
+
   const handleExport = () => {
     const headers = ["Date", "Score", "Sessions", "Journal Entries"];
     const rows = visibleEngagementTrend.map((item) => [
@@ -478,7 +490,7 @@ export function EngagementMetrics() {
               </div>
 
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={userJourneyData}>
+                <BarChart data={visibleUserJourney}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                   <XAxis dataKey="stage" stroke="#9ca3af" angle={-45} textAnchor="end" height={80} />
                   <YAxis stroke="#9ca3af" />
@@ -562,7 +574,7 @@ export function EngagementMetrics() {
             </div>
 
             <ResponsiveContainer width="100%" height={300}>
-              <ComposedChart data={timeOfDayEngagement}>
+              <ComposedChart data={visibleTimeOfDay}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
                 <XAxis dataKey="time" stroke="#9ca3af" />
                 <YAxis yAxisId="left" stroke="#9ca3af" />

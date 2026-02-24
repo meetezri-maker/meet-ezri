@@ -304,7 +304,7 @@ export function WellnessContentLibrary() {
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
-              className="border-gray-300 text-gray-700 hover:bg-gray-100"
+              className="border-gray-300 text-gray-700 hover:bg-gray-300"
             >
               <Download className="w-4 h-4 mr-2" />
               Export

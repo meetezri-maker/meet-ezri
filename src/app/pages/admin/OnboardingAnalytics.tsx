@@ -148,25 +148,47 @@ export function OnboardingAnalytics() {
     { date: "Jun 28", rate: 75 }
   ];
 
+  const getRangeFactor = () => {
+    if (timeRange === "7d") return 0.5;
+    if (timeRange === "14d") return 1;
+    if (timeRange === "30d") return 2;
+    if (timeRange === "90d") return 6;
+    return 1;
+  };
+
+  const rangeFactor = getRangeFactor();
+
+  const visibleFunnelSteps = funnelSteps.map(step => ({
+    ...step,
+    entered: Math.round(step.entered * rangeFactor),
+    completed: Math.round(step.completed * rangeFactor),
+    dropped: Math.round(step.dropped * rangeFactor),
+  }));
+
+  const visibleCompletionTrend = (() => {
+    if (timeRange === "7d") return completionTrend.slice(-7);
+    return completionTrend;
+  })();
+
   // Drop-off by step
-  const dropOffData = funnelSteps.map(step => ({
+  const dropOffData = visibleFunnelSteps.map(step => ({
     name: `Step ${step.step}`,
     dropOff: step.dropped,
     rate: ((step.dropped / step.entered) * 100).toFixed(1)
   }));
 
   // Time spent per step
-  const timeSpentData = funnelSteps.map(step => ({
+  const timeSpentData = visibleFunnelSteps.map(step => ({
     name: step.name.split(" ")[0],
     seconds: step.avgTimeSpent
   }));
 
   const overallStats = {
-    totalStarted: funnelSteps[0].entered,
-    totalCompleted: funnelSteps[funnelSteps.length - 1].completed,
-    overallCompletionRate: ((funnelSteps[funnelSteps.length - 1].completed / funnelSteps[0].entered) * 100).toFixed(1),
-    avgTimeToComplete: funnelSteps.reduce((sum, step) => sum + step.avgTimeSpent, 0),
-    totalDropped: funnelSteps[0].entered - funnelSteps[funnelSteps.length - 1].completed
+    totalStarted: visibleFunnelSteps[0].entered,
+    totalCompleted: visibleFunnelSteps[visibleFunnelSteps.length - 1].completed,
+    overallCompletionRate: ((visibleFunnelSteps[visibleFunnelSteps.length - 1].completed / visibleFunnelSteps[0].entered) * 100).toFixed(1),
+    avgTimeToComplete: visibleFunnelSteps.reduce((sum, step) => sum + step.avgTimeSpent, 0),
+    totalDropped: visibleFunnelSteps[0].entered - visibleFunnelSteps[visibleFunnelSteps.length - 1].completed
   };
 
   const getStepColor = (completionRate: number) => {
@@ -299,7 +321,7 @@ export function OnboardingAnalytics() {
           >
             <h2 className="text-xl font-bold text-gray-900 mb-6">Completion Rate Trend</h2>
             <ResponsiveContainer width="100%" height={250}>
-              <AreaChart data={completionTrend}>
+              <AreaChart data={visibleCompletionTrend}>
                 <defs>
                   <linearGradient id="colorRate" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
@@ -364,8 +386,8 @@ export function OnboardingAnalytics() {
           <h2 className="text-xl font-bold text-gray-900 mb-6">Onboarding Funnel</h2>
 
           <div className="space-y-4">
-            {funnelSteps.map((step, index) => {
-              const barWidth = (step.entered / funnelSteps[0].entered) * 100;
+            {visibleFunnelSteps.map((step, index) => {
+              const barWidth = (step.entered / visibleFunnelSteps[0].entered) * 100;
               
               return (
                 <div key={step.step}>
@@ -448,7 +470,7 @@ export function OnboardingAnalytics() {
                   </motion.div>
 
                   {/* Arrow between steps */}
-                  {index < funnelSteps.length - 1 && (
+                  {index < visibleFunnelSteps.length - 1 && (
                     <div className="flex justify-center my-2">
                       <ArrowRight className="w-5 h-5 text-gray-400" />
                     </div>

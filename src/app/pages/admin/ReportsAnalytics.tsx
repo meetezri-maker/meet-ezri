@@ -89,7 +89,7 @@ TREND ANALYSIS:
 - Week-over-Week Change: -12.3%
 - Peak Crisis Times: 10 PM - 2 AM
 - Most Common Triggers: Anxiety (42%), Depression (31%)
-` : `
+` : reportName === "Session Analytics Report" ? `
 AI SESSION ANALYTICS:
 Total Sessions: 48,420
 Average Session Length: 18.3 minutes
@@ -112,6 +112,21 @@ THERAPEUTIC OUTCOMES:
 - Mood Improvement: +23% average
 - Anxiety Reduction: +31% average
 - User Progress Tracking: 85% active
+` : `
+COMPREHENSIVE ANALYTICS SUMMARY
+Total Users: 12,459
+Active Users: 9,123
+Total Revenue: $286,450
+Crisis Alerts: 142
+AI Sessions: 48,420
+
+KEY PERFORMANCE INDICATORS:
+- User Growth: +8.8% MoM
+- Revenue Growth: +34.5% YoY
+- Crisis Resolution Rate: 97.2%
+- User Satisfaction: 4.8/5.0
+
+(Detailed breakdown available in individual reports)
 `}
 
 DETAILED ANALYTICS:
@@ -150,7 +165,7 @@ For internal use only - Confidential
                 Comprehensive platform insights and data exports
               </p>
             </div>
-            <Button className="gap-2">
+            <Button className="gap-2" onClick={() => handleDownloadPDF("All Reports Summary")}>
               <Download className="w-4 h-4" />
               Export All Reports
             </Button>
