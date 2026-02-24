@@ -59,6 +59,7 @@ export function WellnessContentLibrary() {
   const [viewModalContent, setViewModalContent] = useState<ContentItem | null>(null);
   const [editModalContent, setEditModalContent] = useState<ContentItem | null>(null);
   const [deleteModalContent, setDeleteModalContent] = useState<ContentItem | null>(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const contentItems: ContentItem[] = [
     {
@@ -319,7 +320,7 @@ export function WellnessContentLibrary() {
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
-            <Button className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white">
+            <Button className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white" onClick={() => setCreateModalOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Create Content
             </Button>
@@ -556,7 +557,10 @@ export function WellnessContentLibrary() {
               <p className="text-gray-600 mb-6">
                 Try adjusting your filters or create new content
               </p>
-              <Button className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white">
+              <Button 
+                className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white"
+                onClick={() => setCreateModalOpen(true)}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Content
               </Button>
@@ -905,6 +909,144 @@ export function WellnessContentLibrary() {
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete
                   </Button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Create Content Modal */}
+        <AnimatePresence>
+          {createModalOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+              onClick={() => setCreateModalOpen(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-xl p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                      <Plus className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900">Create Content</h2>
+                      <p className="text-sm text-gray-600">Add a new wellness content item</p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setCreateModalOpen(false)}
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                      <select 
+                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500" 
+                      >
+                        <option value="article">Article</option>
+                        <option value="tip">Tip</option>
+                        <option value="activity">Activity</option>
+                        <option value="video">Video</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
+                    <textarea
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      rows={6}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Tags (comma-separated)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g., wellness, mindfulness, stress"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <select 
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500" 
+                    >
+                      <option value="published">Published</option>
+                      <option value="draft">Draft</option>
+                      <option value="scheduled">Scheduled</option>
+                    </select>
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => setCreateModalOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        alert(`Saved new content`);
+                        setCreateModalOpen(false);
+                      }}
+                    >
+                      <Save className="w-4 h-4 mr-2" />
+                      Save Changes
+                    </Button>
+                    <Button
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                      onClick={() => {
+                        alert(`Published new content`);
+                        setCreateModalOpen(false);
+                      }}
+                    >
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      Publish
+                    </Button>
+                  </div>
                 </div>
               </motion.div>
             </motion.div>
